@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inductive Deductive Synthesis — IDS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --border: #c8c8d8;
+    --text: #1a1a2e;
+    --dim: #5a5a78;
+    --accent: #2f6db0;
+    --accent2: #d03058;
+    --green: #1a8848;
+    --orange: #b06818;
+    --yellow: #8a6800;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    zoom: 1.0;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 4.4rem);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 0.3em;
+  }
+  h2 {
+    font-size: clamp(1.7rem, 3.5vw, 2.9rem);
+    font-weight: 700;
+    margin-bottom: 0.6em;
+    color: var(--accent);
+  }
+  h3 {
+    font-size: clamp(1.15rem, 2.2vw, 1.75rem);
+    font-weight: 600;
+    color: var(--dim);
+    margin-bottom: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .subtitle {
+    font-size: clamp(1.2rem, 2.5vw, 2rem);
+    color: var(--dim);
+    margin-top: 0.5em;
+    font-weight: 400;
+  }
+  .author {
+    font-size: clamp(1.05rem, 1.9vw, 1.5rem);
+    color: var(--text);
+    margin-top: 1.2em;
+  }
+
+  ul { list-style: none; font-size: clamp(1.15rem, 2vw, 1.7rem); line-height: 1.8; }
+  ul li::before { content: "\25b8"; color: var(--accent); margin-right: 0.6em; font-weight: 700; }
+
+  .highlight { color: var(--accent); font-weight: 700; }
+  .warn { color: var(--accent2); font-weight: 700; }
+  .ok { color: var(--green); font-weight: 700; }
+
+  .quote {
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+    font-style: italic;
+    color: var(--dim);
+    border-left: 4px solid var(--accent);
+    padding: 0.6em 1.2em;
+    margin-top: 1.2em;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 1200px;
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+    margin-top: 0.6em;
+  }
+  th { text-align: left; padding: 0.5em 0.8em; color: var(--accent); border-bottom: 2px solid var(--border); font-weight: 700; }
+  td { padding: 0.45em 0.8em; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr td:first-child { color: var(--dim); font-weight: 600; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3vw;
+    align-items: start;
+    margin-top: 0.5em;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2vw;
+    align-items: start;
+    margin-top: 0.5em;
+  }
+
+  code, .code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.8rem, 1.25vw, 1.1rem);
+    line-height: 1.6;
+    background: #eeeef4;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8em 1em;
+    display: block;
+    white-space: pre;
+    overflow-x: auto;
+    max-height: 60vh;
+  }
+
+  .code .kw { color: var(--accent); font-weight: 700; }
+  .code .cm { color: var(--dim); font-style: italic; }
+  .code .str { color: var(--green); }
+  .code .fn { color: var(--orange); }
+  .code .warn { color: var(--accent2); font-weight: 700; }
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.7em 0.9em;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+
+  .info-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7em 0.9em;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.6;
+    overflow-wrap: break-word;
+  }
+
+  .info-box .label {
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 0.4em;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+  }
+
+  .tag {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15em 0.5em;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8em;
+    color: var(--dim);
+    margin-right: 0.3em;
+  }
+
+  .step { opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease; transform: translateY(10px); }
+  .step.visible { opacity: 1; transform: translateY(0); }
+
+  .fig { width: 100%; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+
+  /* progress */
+  .progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width 0.4s ease; z-index: 100; }
+  .slide-num { position: fixed; bottom: 1.2em; right: 2em; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--dim); z-index: 100; }
+
+  .section-label {
+    position: fixed;
+    bottom: 1.2em;
+    left: 2em;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--dim);
+    opacity: 0.6;
+    z-index: 100;
+  }
+
+  .badge {
+    display: inline-block;
+    background: #e8e4e0;
+    color: #5a5a78;
+    font-size: 0.7em;
+    font-weight: 700;
+    padding: 0.1em 0.5em;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 0.3em;
+  }
+
+  .app-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5vw;
+    margin-top: 1em;
+  }
+  .app-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1em;
+    text-align: center;
+  }
+  .app-box .app-title {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    margin-bottom: 0.3em;
+  }
+  .app-box .app-desc {
+    font-size: clamp(0.95rem, 1.25vw, 1.15rem);
+    color: var(--dim);
+    line-height: 1.4;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8em;
+    margin-bottom: 0.6em;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  }
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 0.4em;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ==================== SLIDE 1: TITLE ==================== -->
+  <div class="slide active" id="s0" data-section="Opening">
+    <h3>&nbsp;</h3>
+    <h1><span class="highlight">Inductive Deductive Synthesis</span></h1>
+    <div class="subtitle">Enabling AI to Generate <strong>Formally Verified</strong> Systems</div>
+    <div style="margin-top: 1.0em;">
+      <span class="badge" style="background: #d8e8f4; color: #2f6db0; font-size: 0.95em; padding: 0.25em 0.7em;">NeurIPS 2026 &middot; arXiv:2605.23109</span>
+    </div>
+    <div style="margin-top: 1.4em; font-size: clamp(0.85rem, 1.3vw, 1.1rem); color: var(--text); line-height: 1.9;">
+      <strong style="color: var(--accent);">Shubham Agarwal</strong><sup>1</sup> &middot;
+      Alexander Krentsel<sup>1</sup> &middot;
+      Shu Liu<sup>1</sup> &middot;
+      Mert Cemri<sup>1</sup> &middot;
+      Audrey Cheng<sup>1</sup> &middot;
+      Rui Meng<sup>2</sup> &middot;
+      Tomas Pfister<sup>2</sup> &middot;
+      Chun-Liang Li<sup>2</sup> &middot;
+      Sylvia Ratnasamy<sup>1</sup> &middot;
+      Aditya Parameswaran<sup>1</sup> &middot;
+      Matei Zaharia<sup>1</sup> &middot;
+      Ion Stoica<sup>1</sup> &middot;
+      <strong>Mohsen Lesani</strong><sup>3</sup>
+    </div>
+    <div style="margin-top: 0.6em; font-size: clamp(0.78rem, 1.1vw, 0.95rem); color: var(--dim);">
+      <sup>1</sup>UC Berkeley &nbsp;&middot;&nbsp;
+      <sup>2</sup>Google &nbsp;&middot;&nbsp;
+      <sup>3</sup>UC Santa Cruz
+    </div>
+    <div style="margin-top: 2.0em; display: flex; gap: 0.5em; flex-wrap: wrap;">
+      <span class="tag">Formal Verification</span>
+      <span class="tag">Rocq / Coq</span>
+      <span class="tag">LLM Agents</span>
+      <span class="tag">Distributed Systems</span>
+      <span class="tag">Code + Proof</span>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 2: THE PROBLEM ==================== -->
+  <div class="slide" id="s1" data-section="Motivation">
+    <h3>The Problem</h3>
+    <h2>AI writes code well &mdash; but can't <span class="warn">guarantee</span> it</h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.5em;">
+      <div class="step">
+        <div class="info-box" style="border-left: 4px solid var(--green);">
+          <div class="label">What agents do well</div>
+          <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Generate code for most tasks</div></div>
+          <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Run tests &amp; auto-refine output</div></div>
+          <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Cover the cases they happen to try</div></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="info-box" style="border-left: 4px solid var(--accent2);">
+          <div class="label">Where they fall short</div>
+          <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Correctness <strong>guarantees</strong> over <em>every</em> behavior</div></div>
+          <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Rare bugs testing can't reach</div></div>
+          <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Surface catastrophically at scale</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="step callout" style="margin-top: 1.4em; text-align: center;">
+      <strong>Distributed systems</strong> are the prime example: consistency between reads &amp; writes
+      must hold under <span class="warn">every interleaving</span> of messages, failures, and concurrent updates &mdash;
+      a space no test suite can cover.
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 3: EVIDENCE / THE GAP ==================== -->
+  <div class="slide" id="s2" data-section="Motivation">
+    <h3>The Evidence</h3>
+    <h2>Just hand an agent a proof tool? <span class="warn">No.</span></h2>
+    <div class="two-col" style="grid-template-columns: 1.05fr 1fr; gap: 2.2em;">
+      <div class="step">
+        <div class="info-box">
+          <div class="label">Formal verification works &mdash; but slowly</div>
+          A verified system has three pieces: a <span class="highlight">specification</span>, an <span class="highlight">implementation</span>, and a machine-checked <span class="highlight">proof</span> it matches the spec on every input.
+          <div style="margin-top: 0.6em;">
+            But adoption stalled for 20 years: real systems take
+            <span class="warn">months to years</span> of expert effort.
+            <span style="color: var(--dim); font-size: 0.9em;">(Chapar's KV-store proof: 9&ndash;12 months.)</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="info-box" style="border-left: 4px solid var(--accent2);">
+          <div class="label">SOTA coding agents, given a proof assistant</div>
+          <div style="font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; color: var(--accent2); text-align:center; line-height:1.1;">2&nbsp;/&nbsp;7</div>
+          <div style="text-align:center; color: var(--dim); margin-bottom:0.5em;">specs solved by Codex (GPT-5.4) <em>and</em> Claude Code (Opus 4.6)</div>
+          <div style="font-size: 0.92em;">The failure is <strong>structural</strong>: agents treat verification as a <em>downstream check</em> &mdash; write all the code, then try to prove it all at once.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step" style="text-align: center; margin-top: 1.3em;">
+      <span style="font-size: clamp(1.2rem, 2.2vw, 1.8rem); font-weight: 900; color: var(--accent);">
+        Defer all correctness feedback to the end &rarr; the agent stalls.
+      </span>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 4: KEY INSIGHT ==================== -->
+  <div class="slide" id="s3" data-section="Key Idea">
+    <h3>The Key Insight</h3>
+    <h2>Synthesize code <span class="highlight">and</span> proof &mdash; jointly &amp; incrementally</h2>
+    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 2.5vw; align-items: center;">
+      <div>
+        <img class="fig" src="assets/ids-intro.png" alt="Code and proof advance jointly" style="border:none;">
+      </div>
+      <div>
+        <div class="step info-box" style="margin-bottom: 0.7em;">
+          <div class="label">Two benefits</div>
+          <ul style="font-size: clamp(0.95rem,1.4vw,1.2rem); line-height:1.6;">
+            <li>Each joint step is <strong>simpler to prove</strong></li>
+            <li><strong>Partial</strong> proofs are checkable &mdash; a dead-end is ruled out <em>before</em> work is wasted</li>
+          </ul>
+        </div>
+        <div class="step callout">
+          Like <strong>chain-of-thought</strong> &mdash; but every intermediate step is
+          <span class="highlight">formally encoded and verified</span>.
+        </div>
+        <div class="step callout" style="margin-top: 0.6em; border-color: var(--green);">
+          A failed step also becomes a <strong>counterexample</strong> that improves the next design.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 5: BACKGROUND / COUNTER + ORACLE ==================== -->
+  <div class="slide" id="s4" data-section="Background">
+    <h3>Background</h3>
+    <h2>The type-checker is a <span class="highlight">perfect oracle</span> &mdash; even on partial work</h2>
+    <div style="display: grid; grid-template-columns: 0.62fr 0.38fr; gap: 2vw; align-items: center;">
+      <div class="code" style="font-size: clamp(0.62rem, 0.98vw, 0.86rem); max-height: 62vh;"><span class="cm">(* Specification: a counter *)</span>
+<span class="kw">Axiom</span> read_init : read init = 0.
+<span class="kw">Axiom</span> read_inc : <span class="kw">forall</span> s,
+   read (inc s) = S (read s).
+
+<span class="cm">(* Partial synthesis — still type-checks! *)</span>
+<span class="kw">Definition</span> t := list unit.
+<span class="kw">Definition</span> inc (s:t) : t. <span class="warn">Admitted.</span>   <span class="cm">(* hole *)</span>
+<span class="kw">Theorem</span> read_inc : <span class="kw">forall</span> s, ...
+<span class="warn">Admitted.</span>                            <span class="cm">(* hole *)</span>
+
+<span class="cm">(* Complete synthesis *)</span>
+<span class="kw">Definition</span> inc (s:t) := <span class="str">tt :: s</span>.
+<span class="kw">Proof.</span> intros s. simpl. reflexivity. <span class="ok">Qed.</span></div>
+      <div>
+        <div class="step info-box">
+          <div class="label">Accept iff correct</div>
+          Rocq/Coq accepts a proof <strong>iff</strong> it satisfies its proposition. <span class="ok">No false positives</span>, no false negatives.
+        </div>
+        <div class="step info-box" style="margin-top:0.6em;">
+          <div class="label">vs. weaker signals</div>
+          Tests (only inputs tried), static analysis (over-approximate), LLM-as-judge (guesses).
+        </div>
+        <div class="step callout" style="margin-top:0.6em;">
+          Unproven goals become <strong>deferred holes</strong> (<code style="display:inline;padding:0.1em 0.3em;border:none;background:#fff3cd;">Admitted</code>) &mdash; and the file <em>still checks</em>.
+        </div>
+      </div>
+    </div>
+    <div class="step" style="text-align:center; margin-top:0.7em; font-size: clamp(0.9rem,1.4vw,1.15rem); color: var(--dim);">
+      Counter <span class="highlight">&rarr;</span> distributed store: axioms become read-your-writes; one <code style="display:inline;padding:0 0.2em;border:none;background:#eee;">nat</code> becomes a per-client vector; tactics become an inductive simulation with dozens of lemmas.
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 6: ARCHITECTURE ==================== -->
+  <div class="slide" id="s5" data-section="System">
+    <h3>The System</h3>
+    <h2>IDS as a <span class="highlight">multi-agent</span> architecture</h2>
+    <img class="fig" src="assets/overview.png" alt="IDS agentic architecture" style="max-height: 46vh; object-fit: contain;">
+    <div class="three-col" style="margin-top: 0.9em;">
+      <div class="step info-box" style="border-top: 4px solid var(--accent); padding: 0.7em 0.9em;">
+        <div style="font-weight:900; color: var(--accent);">&#9312; DSA &mdash; Deductive</div>
+        <div style="font-size:0.9em; color:var(--dim);">Recursively decomposes component + spec into sub-parts with placeholders; type-checker <strong>&#9313;</strong> grades every step.</div>
+      </div>
+      <div class="step info-box" style="border-top: 4px solid var(--accent2); padding: 0.7em 0.9em;">
+        <div style="font-weight:900; color: var(--accent2);">&#9316; ISA &mdash; Inductive</div>
+        <div style="font-size:0.9em; color:var(--dim);"><strong>Proposer</strong> (A): helper lemmas on tactical stalls. <strong>Reloader</strong> (B): a fresh design on dead-ends.</div>
+      </div>
+      <div class="step info-box" style="border-top: 4px solid var(--green); padding: 0.7em 0.9em;">
+        <div style="font-weight:900; color: var(--green);">Coordinator</div>
+        <div style="font-size:0.9em; color:var(--dim);">Runs parallel DSAs, <strong>&#9314;</strong> benchmarks candidates eagerly, <strong>&#9315;</strong> audits closed proofs for non-vacuity.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 7: RESULTS Q1 ==================== -->
+  <div class="slide" id="s6" data-section="Results">
+    <h3>Q1 &mdash; Hard specifications</h3>
+    <h2>IDS solves <span class="highlight">7/7</span>; SOTA agents only 2/7</h2>
+    <table style="font-size: clamp(0.85rem, 1.4vw, 1.2rem);">
+      <tr><th>Specification</th><th>Codex</th><th>Claude Code</th><th>IDS</th><th>IDS time / cost</th></tr>
+      <tr><td>Chapar Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; \$148</td></tr>
+      <tr><td>Read-Your-Writes</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>2 h &middot; \$52</td></tr>
+      <tr><td>Monotonic Reads</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>7 h &middot; \$102</td></tr>
+      <tr><td>Monotonic Writes</td><td>2/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>3 h &middot; \$58</td></tr>
+      <tr><td>RYW + MW</td><td class="warn">0/3</td><td class="warn">1/3</td><td class="ok">3/3</td><td>5 h &middot; \$93</td></tr>
+      <tr><td>Suite Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td>2/3</td><td>11 h &middot; \$155</td></tr>
+      <tr><td>Labeled Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; \$136</td></tr>
+      <tr style="font-weight:700;"><td>Total</td><td class="warn">2/7</td><td class="warn">2/7</td><td class="ok">7/7</td><td>~6.8 h &middot; \$106 avg</td></tr>
+    </table>
+    <div class="callout" style="margin-top: 0.9em;">
+      Chapar's causal-consistency proof closed in <strong>10 h</strong> &mdash; roughly <span class="highlight">200&times; faster</span> than the cited 9&ndash;12 months of expert effort. No human intervention, no fine-tuning.
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 8: RESULTS Q2 PERFORMANCE ==================== -->
+  <div class="slide" id="s7" data-section="Results">
+    <h3>Q2 &mdash; Performance in the loop</h3>
+    <h2>Verified <span class="highlight">and</span> fast: up to 3&times; throughput</h2>
+    <img class="fig" src="assets/eval-perf.png" alt="Throughput, latency, memory vs put rate" style="max-height: 40vh; object-fit: contain;">
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2em; margin-top: 0.9em;">
+      <div class="step callout">
+        IDS matches or beats <strong>every</strong> hand-written expert reference: <span class="ok">3&times;</span> on Chapar's vector-clock store, <span class="ok">1.4&times;</span> on CC &amp; monotonic reads; on MW/RYW+MW the reference <em>times out</em>.
+      </div>
+      <div class="step callout" style="border-color: var(--green);">
+        <strong>Why?</strong> The proof obligation drove the agent to <span class="highlight">bounded data representations</span>; benchmark feedback then steers it to the fastest <em>verifying</em> candidate.
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 9: RESULTS Q3 ABLATIONS + GENERAL PROVER ==================== -->
+  <div class="slide" id="s8" data-section="Results">
+    <h3>Q3 &mdash; What drives it + generality</h3>
+    <h2>Joint design &amp; rich feedback <span class="highlight">matter</span></h2>
+    <div style="display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 2.2vw; align-items: center;">
+      <div>
+        <img class="fig" src="assets/eval-crosslang.png" alt="Cross-language success rates" style="max-height: 44vh; object-fit: contain;">
+        <div style="text-align:center; font-size:0.85em; color:var(--dim); margin-top:0.3em;">DSA alone sets new SOTA across 4 languages</div>
+      </div>
+      <div>
+        <div class="step info-box">
+          <div class="label">Ablations (on VERINA, 189 tasks)</div>
+          <ul style="font-size: clamp(0.92rem,1.35vw,1.15rem); line-height:1.55;">
+            <li>Remove <strong>joint</strong> discovery: hard specs &rarr; 0/3</li>
+            <li>Replace structured Coq diagnostic with accept/reject: <span class="warn">&minus;35%</span> (most consequential)</li>
+            <li>Drop perf feedback: <span class="warn">1.42&times; slower</span> on average</li>
+            <li>Drop audit: ships vacuous proofs (e.g. <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">put-guard = false</code>)</li>
+          </ul>
+        </div>
+        <div class="step callout" style="margin-top:0.7em; border-color: var(--green);">
+          As a <strong>general prover</strong>: 176/189 VERINA (prior 38), 65/77 AlgoVeri (prior 31), <span class="ok">62/62</span> CloverBench. +10% to +51% over the same model without the IDS architecture.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 10: CONCLUSION ==================== -->
+  <div class="slide" id="s9" data-section="">
+    <div style="text-align: center; margin-top: 1em;">
+      <h1 style="margin-bottom: 0.4em;"><span class="highlight">Inductive Deductive Synthesis</span></h1>
+      <div style="font-size: clamp(1.1rem, 2vw, 1.6rem); color: var(--dim); margin-bottom: 1.2em;">
+        Verified systems: from a <strong>person-year</strong> bottleneck to a <strong>compute</strong> problem
+      </div>
+      <div style="display: flex; gap: 2.5em; justify-content: center; margin: 1.4em 0; flex-wrap: wrap;">
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--accent);">7/7</div><div style="font-size: 0.9em; color: var(--dim);">specs solved (SOTA: 2/7)</div></div>
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--green);">3&times;</div><div style="font-size: 0.9em; color: var(--dim);">throughput vs. references</div></div>
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--orange);">200&times;</div><div style="font-size: 0.9em; color: var(--dim);">faster than expert effort</div></div>
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--accent2);">6</div><div style="font-size: 0.9em; color: var(--dim);">new Coq specs released</div></div>
+      </div>
+      <div class="callout" style="max-width: 900px; margin: 0.5em auto;">
+        Joint, incremental code+proof under a <strong>partial-proof oracle</strong>, with failure &amp; performance feedback in the same loop. Generalizes to any domain with a machine-checkable correctness oracle &mdash; kernels, compilers, crypto, hardware.
+      </div>
+      <div style="margin-top: 1.4em; font-size: clamp(0.9rem, 1.4vw, 1.15rem); color: var(--dim);">
+        Open problem ahead: <span class="highlight">writing the specification</span> is now the bottleneck.
+      </div>
+      <div style="margin-top: 1.0em; display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center;">
+        <span class="tag">github.com/skydiscover-ai/skydiscover</span>
+        <span class="tag">NeurIPS 2026</span>
+      </div>
+      <div class="author" style="margin-top: 1.2em; font-size: clamp(0.95rem,1.5vw,1.25rem);">
+        Thank you &mdash; <strong>Questions?</strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Controls -->
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum">1 / 10</div>
+<div class="section-label" id="sectionLabel"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  const slideNum = document.getElementById('slideNum');
+  const sectionLabel = document.getElementById('sectionLabel');
+  let current = 0;
+
+  function getSteps(slideEl) { return slideEl.querySelectorAll('.step'); }
+  function getVisibleStepCount(slideEl) { return slideEl.querySelectorAll('.step.visible').length; }
+  function showNextStep(slideEl) {
+    const steps = getSteps(slideEl);
+    const nextIdx = getVisibleStepCount(slideEl);
+    if (nextIdx < steps.length) { steps[nextIdx].classList.add('visible'); return true; }
+    return false;
+  }
+  function resetSteps(slideEl) { slideEl.querySelectorAll('.step').forEach(s => s.classList.remove('visible')); }
+  function showAllSteps(slideEl) { slideEl.querySelectorAll('.step').forEach(s => s.classList.add('visible')); }
+
+  function show(n) {
+    if (n === current) return;
+    const goingForward = n > current;
+    slides[current].classList.remove('active');
+    resetSteps(slides[current]);
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    if (!goingForward) showAllSteps(slides[current]);
+    updateUI();
+  }
+  function advance() { if (!showNextStep(slides[current])) show(current + 1); }
+  function retreat() { show(current - 1); }
+
+  function updateUI() {
+    progress.style.width = ((current / (slides.length - 1)) * 100) + '%';
+    slideNum.textContent = (current + 1) + ' / ' + slides.length;
+    const section = slides[current].getAttribute('data-section');
+    sectionLabel.textContent = section || '';
+    history.replaceState(null, '', '#' + (current + 1));
+  }
+
+  function loadFromHash() {
+    const hash = window.location.hash.replace('#', '');
+    const n = parseInt(hash, 10);
+    if (n >= 1 && n <= slides.length) {
+      // hide & reset every slide, then activate the target (avoids stale .active on hash jumps)
+      slides.forEach(s => { s.classList.remove('active'); resetSteps(s); });
+      current = n - 1;
+      slides[current].classList.add('active');
+      showAllSteps(slides[current]);
+      updateUI();
+    }
+  }
+  window.addEventListener('hashchange', loadFromHash);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); advance(); }
+    if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') { e.preventDefault(); retreat(); }
+    if (e.key === 'Home') { e.preventDefault(); show(0); }
+    if (e.key === 'End') { e.preventDefault(); show(slides.length - 1); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) { if (dx < 0) advance(); else retreat(); }
+  });
+
+  loadFromHash();
+  updateUI();
+</script>
+
+</body>
+</html>
