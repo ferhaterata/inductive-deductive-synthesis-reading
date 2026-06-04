@@ -395,8 +395,7 @@
     <div style="display: grid; grid-template-columns: 0.62fr 0.38fr; gap: 2vw; align-items: center;">
       <div class="code" style="font-size: clamp(0.62rem, 0.98vw, 0.86rem); max-height: 62vh;"><span class="cm">(* Specification: a counter *)</span>
 <span class="kw">Axiom</span> read_init : read init = 0.
-<span class="kw">Axiom</span> read_inc : <span class="kw">forall</span> s,
-   read (inc s) = S (read s).
+<span class="kw">Axiom</span> read_inc : <span class="kw">forall</span> s, read (inc s) = S (read s).
 
 <span class="cm">(* Partial synthesis — still type-checks! *)</span>
 <span class="kw">Definition</span> t := list unit.
@@ -424,6 +423,13 @@
     <div class="step" style="text-align:center; margin-top:0.7em; font-size: clamp(0.9rem,1.4vw,1.15rem); color: var(--dim);">
       Counter <span class="highlight">&rarr;</span> distributed store: axioms become read-your-writes; one <code style="display:inline;padding:0 0.2em;border:none;background:#eee;">nat</code> becomes a per-client vector; tactics become an inductive simulation with dozens of lemmas.
     </div>
+  </div>
+
+  <!-- ==================== SLIDE 5b: ROCQ / COQ ASIDE ==================== -->
+  <div class="slide" id="s4b" data-section="Aside">
+    <h3>Aside &mdash; wait, Rocq or Coq?</h3>
+    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
+         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
   </div>
 
   <!-- ==================== SLIDE 6: ARCHITECTURE ==================== -->
@@ -504,6 +510,38 @@
         <div class="step callout" style="margin-top:0.7em; border-color: var(--green);">
           As a <strong>general prover</strong>: 176/189 VERINA (prior 38), 65/77 AlgoVeri (prior 31), <span class="ok">62/62</span> CloverBench. +10% to +51% over the same model without the IDS architecture.
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE: ANTICIPATED Q&A ==================== -->
+  <div class="slide" id="s8b" data-section="Q&amp;A">
+    <h3>Anticipated Questions</h3>
+    <h2>What people usually ask</h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 1.4em 2.2em; margin-top: 0.2em;">
+      <div class="info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Doesn't this just shift the burden to writing the spec?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Yes &mdash; the paper says so. The <strong>spec is now the bottleneck</strong>. Two future directions: <em>adversarial spec synthesis</em> (an agent interrogating a human in natural language) and <em>spec extraction</em> from existing systems.</span>
+      </div>
+      <div class="info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Is the proof trusted, or could the agent cheat?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">The <strong>audit step</strong> rejects vacuous proofs: no remaining <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">Admitted</code>/axioms, the real interface implemented, non-trivial impl, correct theorem stated. They caught an agent shipping a <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">put-guard = false</code>.</span>
+      </div>
+      <div class="info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Why Coq and not Lean / Verus?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Ecosystem maturity, plus Chapar gave a complete formal spec to start from. IDS only needs a backend with <strong>partial-proof checking, a programmatic interface, and executable extraction</strong> &mdash; Lean and Verus both qualify.</span>
+      </div>
+      <div class="info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">How much does a run cost / how long?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">On average <strong>~6.8 h and ~\$106</strong> per spec; max 11 h / \$155. Same model and budget as the baselines, so the comparison isolates the <em>architecture</em>.</span>
+      </div>
+      <div class="info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Is the win the model or the method?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">The <strong>method</strong>. Swapping the base model (Codex&nbsp;&rarr;&nbsp;Claude) under the same prompt gains <span class="warn">at most 6%</span>; the IDS architecture adds <span class="ok">+10% to +51%</span> on cross-language benchmarks.</span>
+      </div>
+      <div class="info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Does it work beyond key-value stores?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Evaluated only on distributed KV stores. The <strong>DSA-as-general-prover</strong> results across four languages suggest it transfers; other domains (OS protocols, crypto) are future work.</span>
       </div>
     </div>
   </div>

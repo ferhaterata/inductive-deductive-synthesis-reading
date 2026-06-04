@@ -1,6 +1,11 @@
 # Scratch screenshots / working images
 shots/
 slide1.png
+verify-*.png
+
+# Playwright MCP screenshot output
+.playwright-mcp/
+**/.playwright-mcp/
 
 # OS / editor cruft
 .DS_Store

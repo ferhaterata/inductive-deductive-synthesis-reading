@@ -1,7 +1,7 @@
 # Speaker Transcript — Inductive Deductive Synthesis (IDS)
 
-**Target:** ~8 min talk + 2 min Q&A · 10 slides
-**How to use:** Each slide has a **time budget**, a **word-for-word script** (≈ speaking pace 140 wpm), and a **cue** for when to advance. Total scripted time ≈ 7:50, leaving buffer.
+**Target:** ~8 min talk + Q&A · 12 slides
+**How to use:** Each slide has a **time budget**, a **word-for-word script** (≈ speaking pace 140 wpm), and a **cue** for when to advance. Total scripted time ≈ 8:05, leaving buffer. Two slides are optional asides — the **Rocq/Coq** slide (skippable comic relief) and the **Q&A** slide (a backstop for the discussion); cut either if you're running long.
 
 ---
 
@@ -59,6 +59,14 @@
 
 ---
 
+## Slide 5b — Aside: Rocq or Coq?  ·  [~10 sec, optional]
+
+> "Quick aside, since I keep saying *Rocq, formerly Coq* — yes, that's real. The Coq proof assistant was officially renamed **Rocq** as of version 9.0. Part of it is honoring *Inria Rocquencourt*, where it started — and part of it, per the dev team, is avoiding the unfortunate slang. Same tool, new name. Okay, back to the system."
+
+**Cue:** *(Optional comic-relief slide — it's just the screenshot. Skip entirely if running long.)* Advance on "back to the system."
+
+---
+
 ## Slide 6 — The System  ·  [4:20–5:15]  ·  ~55 sec
 
 > "We realize this as a multi-agent system. Two roles matter.
@@ -105,7 +113,7 @@
 
 ---
 
-## Slide 10 — Conclusion  ·  [7:35–7:55]  ·  ~20 sec
+## Slide 12 — Conclusion  ·  [7:35–7:55]  ·  ~20 sec
 
 > "So, to wrap up: verified software used to be a *person-year* problem. IDS turns it into a *compute* problem — joint, incremental code-and-proof under a partial-proof oracle. Seven out of seven, three times faster, two-hundred times cheaper in human time, and it generalizes to any domain with a machine-checkable oracle. The next bottleneck is writing the *specification* itself. Happy to take questions."
 
@@ -113,7 +121,13 @@
 
 ---
 
-## Anticipated Q&A (prep, not spoken)
+## Slide 11 — Anticipated Q&A (on-screen backstop)
+
+> *(This is now a slide — the six common questions are on screen as a grid. Don't read it top to bottom; let the audience ask, then point to the relevant tile and answer from the notes below. If no questions come, you can volunteer one: "A question I usually get is whether this just shifts the burden to writing the spec — and the honest answer is yes…")*
+
+**Cue:** advance to the conclusion when discussion winds down (or skip straight here if you prefer to close on the summary).
+
+The six tiles, with fuller answers:
 
 - **"Doesn't this just shift the burden to writing the spec?"**
   Yes — and the paper says so explicitly. Writing the formal spec is now the bottleneck. They point to two future directions: adversarial spec synthesis (an agent interrogating a human in natural language) and spec extraction from existing systems.
@@ -169,10 +183,12 @@ These are the ones a skeptical reviewer asks. The move on each: **acknowledge th
 | 3 | Evidence (2/7) | 1:00 | 2:25 |
 | 4 | Key idea | 0:55 | 3:20 |
 | 5 | The oracle | 1:00 | 4:20 |
-| 6 | Architecture | 0:55 | 5:15 |
-| 7 | Q1 — 7/7 | 0:50 | 6:05 |
-| 8 | Q2 — perf | 0:50 | 6:55 |
-| 9 | Q3 — ablations | 0:40 | 7:35 |
-| 10 | Conclusion | 0:20 | 7:55 |
+| 5b | Rocq/Coq aside *(optional)* | 0:10 | 4:30 |
+| 6 | Architecture | 0:55 | 5:25 |
+| 7 | Q1 — 7/7 | 0:50 | 6:15 |
+| 8 | Q2 — perf | 0:50 | 7:05 |
+| 9 | Q3 — ablations | 0:40 | 7:45 |
+| 11 | Q&A backstop *(during discussion)* | — | — |
+| 12 | Conclusion | 0:20 | 8:05 |
 
-**If you're running long:** compress slides 5 and 9 first (the most cuttable). **If short:** expand the Chapar backtracking story on slide 7 — it's the most memorable concrete result.
+**If you're running long:** drop the **Rocq/Coq aside** (5b) and compress slides 5 and 9 first (the most cuttable). The Q&A slide (11) only costs time if questions come. **If short:** expand the Chapar backtracking story on slide 7 — it's the most memorable concrete result.
