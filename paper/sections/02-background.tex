@@ -1,0 +1,67 @@
+\section{Background and Overview}
+\label{sec:background}
+
+We begin with a short introduction to formal verification.
+A formally verified system has three pieces. The \emph{specification} is a precise mathematical statement of correctness; the \emph{implementation} is the code that runs; and the \emph{proof} is a machine-checkable argument that, on every input, the implementation matches the specification. Historically, humans wrote all three; \sys{} takes a human-written spec and automatically produces both implementation and proof, using LLM agents driven by the proof assistant \coq{}~\cite{coq}. We show a simple example: a \emph{counter}, a state machine with two operations (\texttt{inc} to increment the count and \texttt{read} to return it) starting from an initial state \texttt{init}.
+
+\input{figures/counter-listing}
+
+Figure~\ref{fig:counter-listing} shows the counter's \textit{specification} (left), a \textit{partial synthesis} (center), and a \textit{complete synthesis} (right). The spec states two properties, or ``axioms,'' about \texttt{init}, \texttt{inc}, and \texttt{read}: reading the initial state returns zero, and reading after an increment returns one more than reading before. In the partial synthesis, \texttt{inc}'s body and the \texttt{read\_inc} theorem are deferred via \texttt{Admitted} (a placeholder for unfinished work), but \coq{} still accepts the file: the chosen representation (a list whose length encodes the count) is consistent with the work so far. The complete synthesis fills in the deferred pieces.
+The representation is a free choice; any state satisfying the axioms works, though \texttt{nat} (natural numbers) is more efficient.
+
+
+\textbf{\coq{}'s type-checker as an oracle, including for partial work. \ }
+\coq{}'s checker \textit{accepts} a declaration/proof if and only if it satisfies its stated type/proposition, and rejects with a precise diagnostic otherwise. There are no false positives or false negatives, in contrast to tests (only the inputs tried), static analysis (over-approximate), or LLM-as-judge (guesses). The verdict also extends to \emph{partial} code, as the center column of Figure~\ref{fig:counter-listing} illustrates: unproven obligations are stated as \emph{deferred holes} (\texttt{Admitted} lemmas or stub function bodies), and the file still type-checks.
+(\cref{app:progression} walks a longer \texttt{all\_less\_than} example through this progression.)
+\sys{} leverages the type-checker as an oracle to drive a \emph{deductive synthesis}~\cite{manna-waldinger}: at every step, the agent extends the partial implementation and proof, then asks \coq{} whether the partial state still type-checks. A yes keeps the design on track; a no rules it out before further work is committed. \aknew{If progress stalls (measured by the number of partial proofs left empty), IDS reverts to an earlier state.}
+
+
+\textbf{From counter to distributed stores. \ }
+\sys{} applies this loop at scale.
+For distributed systems, the specification grows from simple axioms to conditions over executions involving messages, clients, replicas, and failures.
+For example, \texttt{read\_inc} in a distributed setting becomes read-your-writes: a client that increments then reads must observe its own increments.
+The implementation grows from a few-line module to a multi-replica protocol with larger state, multiple message types, and handlers.
+For example, a replica can no longer store one \texttt{nat}; it must keep a vector with one entry per client, tracking the increments received from that client. On a request carrying the client's increment count, the replica can then tell whether it is up-to-date enough to serve, providing read-your-writes.
+The proof grows from simple tactics to an inductive simulation argument (an induction linking implementation and spec states) with dozens of helper lemmas.
+
+Such implementations span a large, subtle design space with widely varying performance, explored by decades of research. \cref{sec:design} describes the agent that drives this process, \cref{app:suite} gives the full specifications, and \cref{sec:eval} reports results.
+
+
+% ===== PRIOR (BULLET) DRAFT - kept for reference =====
+
+% \shubham{Simple example where we show proof implementation, and how this goes to do the synthesis and proof}
+
+% \accheng{I would make sure to be clear where AI can fit into this process. What was manual before? What needs to be manual now?}
+
+% \mohsen{If you have oracle, then why do we need LLM?}
+% \mohsen{Specification, agent generate proof. understood, but why challenges, manually. Why Vibe proof is the right tool.}
+% \mohsen{Not clear: oracle, previous work using Lean, challenges for distributed computing}
+% \mohsen{Example}
+
+% \paragraph{Specification, implementation, and proof.}
+% \begin{itemize}
+%   \item \emph{Specification}: a precise mathematical statement of what correctness means (e.g., ``all clients see operations in causal order'').
+%   \item \emph{Implementation}: concrete types and functions that fit the spec's module interface (e.g., a \texttt{get}/\texttt{put} key-value store with vector clocks).
+%   \item \emph{Proof}: a machine-checked argument that the implementation satisfies the spec (e.g., a simulation between concrete state and spec state).
+%   \item In a \emph{modular framework} (such as Coq's \texttt{Module Type}), the spec and the module interface are \emph{fixed inputs}; the implementation and proof are the \emph{creative outputs} to produce.
+% \end{itemize}
+
+% \paragraph{Deductive synthesis.}
+% \begin{itemize}
+%   \item \emph{Joint construction}: produce implementation and proof together against a fixed spec~\cite{manna-waldinger}.
+%   \item \emph{Stepwise refinement}: advance one step at a time, with the type-checker as the gate~\cite{morgan-refinement}.
+%   \item \emph{Deferred holes}: state a sub-goal as a named placeholder (e.g., an \texttt{Admitted} lemma or a stub) and discharge it later, in the Sketch tradition~\cite{sketch}.
+%   \item \emph{Structural coupling}: data structures determine which invariants hold, which determine which lemmas are provable; one design change can invalidate the entire proof tree.
+%   \item \emph{Sequential human practice}: pick a design, prove for months, rarely revisit; performant designs often resist proof, and proof-friendly designs are often slow.
+%   \item \emph{Example flow}: from a causal-consistency spec, choose vector clocks for state; write \texttt{get}/\texttt{put} method bodies; state and discharge non-simulation obligations (initialisation, preservation); finally prove a simulation lemma. The type-checker gates each step; \texttt{Admitted} holes are filled later.
+% \end{itemize}
+
+% \paragraph{Proof assistants as perfect verification oracles.}
+% \begin{itemize}
+%   \item A proof assistant (Coq, Lean, Dafny, Verus) is an environment whose kernel checks each definition and lemma against the type theory as you write it.
+%   \item The verdict is exact: \emph{accept} iff mathematically correct, \emph{reject} with a precise diagnostic. No false positives, no false negatives, in contrast to tests (only the inputs tried), static analysis (over-approximate), or LLM-as-judge (guesses).
+%   \item The oracle also works on \emph{partial} code: an \texttt{Admitted} axiom or stub stands in for an unproven sub-goal, and the rest of the file still type-checks. An agent can therefore tell ``this branch is on track'' from ``this branch is a dead end'' without committing to a full proof.
+%   \item Yet the oracle scores candidates but does not propose them: the design, the next sub-lemma to factor, and when to abandon a path are open. \cref{sec:design} describes the agent that closes that loop.
+% \end{itemize}
+
+% \input{figures/dist-counter}

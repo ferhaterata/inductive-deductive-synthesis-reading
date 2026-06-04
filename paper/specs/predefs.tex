@@ -1,0 +1,277 @@
+
+\usepackage{mathpartir}
+
+\usepackage{graphicx}
+
+% \usepackage[firstpage]{draftwatermark}
+% % \SetWatermarkText{\hspace*{8in}\raisebox{3.5in}{\includegraphics[scale=0.1]{aec-badge-popl.pdf}}}
+% \SetWatermarkText{\hspace*{13.3in}\raisebox{-6.5in}{\includegraphics[scale=0.1]{aec-badge-popl.pdf}}}
+% \SetWatermarkAngle{0}
+
+%--------------------------------------
+% To use \mathbb
+\usepackage{amsfonts}
+%--------------------------------------
+% To defined theorems and Lemmas
+ \usepackage{amsthm} 
+\theoremstyle{definition}  % non-italic
+% Definition, Lemma and Theorem
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+% \newtheorem{definition}{Lemma}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+%--------------------------------------
+% To have colored annotations
+\usepackage{xcolor}
+%--------------------------------------
+% To strike out text
+\usepackage[normalem]{ulem}
+\usepackage{cancel}
+%--------------------------------------
+%\usepackage{hyperref}
+\usepackage{url}
+%--------------------------------------
+% Programming language rules
+\usepackage{mmm}
+\usepackage{pl}
+%--------------------------------------
+% Arrow symbols 
+\let\Bbbk\relax
+\usepackage{amssymb}
+%--------------------------------------
+% \xrightarrow
+\usepackage{amsmath}
+%--------------------------------------
+% % To write algorithms
+% \usepackage{algorithm}
+% %\usepackage{algpseudocode}
+% \usepackage[noend]{algpseudocode}
+% \let\algState\State
+% \usepackage{varwidth}% http://ctan.org/pkg/varwidth
+% % To have Algorithm float
+% % \usepackage{algorithm}
+% % To make the algorithms float to the top
+% \usepackage{float}
+% \newfloat{algorithm}{t}{lop}
+% %\renewcommand{\algorithmicforall}{\textbf{foreach}}
+%--------------------------------------
+
+% this employs smarter hyphenations, par, and other rules
+% ... and helps condense the paper
+\usepackage{microtype}
+
+% To remove a warning for fonts
+% \usepackage{lmodern}% http://ctan.org/pkg/lm
+
+%--------------------------------------
+% Symbol definitions and comments
+% Standard
+\def\t{\phantom{X}}
+
+\def\<{\langle}
+\def\>{\rangle}
+
+%--------------------------------------
+
+\usepackage{listings}
+\lstset{
+   language=C,
+   captionpos=b,
+   tabsize=3,
+%   frame=lines,
+%   keywordstyle=\color{blue},
+%   commentstyle=\color{darkgreen},
+%   stringstyle=\color{red},
+   numbers=left,
+   numberstyle=\tiny,
+   numbersep=5pt,
+   breaklines=true,
+   showstringspaces=false,
+%   basicstyle=\small\bfseries,
+   basicstyle=\small\ttfamily,
+   emph={label}
+}
+
+\usepackage{array}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning} 
+\usetikzlibrary{arrows} 
+%\usetikzlibrary{graphs} % Not supported by tikz 2.10
+\usetikzlibrary{calc}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{shapes}
+
+%\usepackage{caption}
+%\usepackage{subcaption}
+
+\usepackage{stmaryrd}
+
+\def\defeq{\triangleq}
+
+\def\self{\mathit{self}}
+
+\def\switch{\mathsf{switch} \ }
+\def\case{\mathsf{case} \ }
+\def\ret{\mathsf{ret} \ }
+\def\lforall{\mathsf{forall} \ }
+\def\lif{\mathsf{if} \ }
+\def\lelse{\mathsf{else} \ }
+\def\lmap{\mathsf{map} \ }
+\def\llet{\mathsf{let} \ }
+\def\max{\mathsf{max}}
+
+\def\vc{\mathit{vc}}
+\def\List{\mathsf{List}}
+\def\llookup{\mathsf{lookup} \ }
+
+\def\RYW{\mathit{RYW}}
+\def\MR{\mathit{MR}}
+\def\WFR{\mathit{WFR}}
+\def\MW{\mathit{MW}}
+\def\CC{\mathit{CC}}
+\def\LCC{\mathit{LCC}}
+\def\Rel{\mathit{Rel}}
+
+\def\ext{\mathsf{ext}}
+
+\def\CState{\mathsf{CState}}
+\def\RState{\mathsf{RState}}
+
+\def\true{\mathsf{true}}
+\def\Set{\mathsf{Set}}
+\def\Nat{\mathsf{Nat}}
+% \def\L{\mathsf{L}}
+\def\L{L}
+\def\lab{\mathit{label}}
+\def\clientLabs{\mathit{client\text{-}labels}}
+
+\def\cInit{\mathsf{c\text{-}init}}
+\def\rInit{\mathsf{r\text{-}init}}
+
+\def\get{\mathsf{get}}
+\def\getGuard{\mathsf{get\text{-}guard}}
+\def\getReq{\mathsf{get\text{-}req}}
+\def\getRes{\mathsf{get\text{-}res}}
+
+\def\lput{\mathsf{put}}
+\def\putGuard{\mathsf{put\text{-}guard}}
+\def\putReq{\mathsf{put\text{-}req}}
+\def\putRes{\mathsf{put\text{-}res}}
+
+\def\Type{\mathsf{Type}}
+\def\Option{\mathsf{Option}}
+\def\Bool{\mathsf{Bool}}
+
+\def\Event{\mathit{Event}}
+\def\Req{\mathit{Req}}
+\def\req{\mathit{req}}
+
+\def\Res{\mathit{Res}}
+\def\res{\mathit{res}}
+
+\def\PutReq{\mathit{Put\text{-}req}}
+\def\PutReqPayload{\mathsf{Put\text{-}req\text{-}payload}}
+\def\PutRes{\mathit{Put\text{-}res}}
+\def\PutResPayload{\mathsf{Put\text{-}res\text{-}payload}}
+
+\def\GetReq{\mathit{Get\text{-}req}}
+\def\GetReqPayload{\mathsf{Get\text{-}req\text{-}payload}}
+\def\GetRes{\mathit{Get\text{-}res}}
+\def\GetResPayload{\mathsf{Get\text{-}res\text{-}payload}}
+
+\def\Unit{\mathsf{Unit}}
+
+% Program Syntax
+
+% Uses:
+% $
+% \sPut{}{},
+% \sPut{k}{v},
+% \sPut[i]{k}{v},
+% % 
+% \sGet{}{},
+% \sGet{x}{k},
+% \sGet[i]{x}{k},
+% $
+
+\newcommand\sPut[3][]{%
+  \mathit{put}%
+  \ifthenelse{\equal{#1}{}}{%
+    \ifthenelse{\equal{#2}{}}{}{
+    ({#2},{#3})}%
+  }{%
+    ^{#1}({#2},{#3})%
+  }%
+}  
+  
+\newcommand\sGet[3][]{%
+   \ifthenelse{\equal{#2}{}}{}{#2\leftarrow}%
+   \mathit{get}
+   \ifthenelse{\equal{#1}{}}{}{^{#1}}%
+   \ifthenelse{\equal{#3}{}}{}{({#3})}}
+
+% \newcommand\sGet[2][]{%
+%     \ifthenelse{\equal{#1}{}}{}{#1\leftarrow }%
+%     \mathit{get}%
+%     \ifthenelse{\equal{#2}{}}{}{({#2})}}
+    
+  \newcommand\sSkip{\mathit{skip}}
+
+\newcommand{\name}[1]{\textsc{#1}}
+
+\newcommand\indrule[3][]{%
+%  \inferrule*[Right=#1]{#2}{#3}%
+  \inferrule[#1]{#2}{#3}%
+  }
+
+\newcommand\figurealgtextsize{%
+%   \small%
+  \setlength{\abovedisplayskip}{0pt}%
+  \setlength{\abovedisplayshortskip}{0pt}%
+  \setlength{\belowdisplayskip}{0pt}%
+  \setlength{\belowdisplayshortskip}{0pt}}
+\newcommand\figureruletextsize{%
+%   \small
+  \setlength{\abovedisplayskip}{0pt}%
+  \setlength{\abovedisplayshortskip}{0pt}%
+  \setlength{\belowdisplayskip}{0pt}%
+  \setlength{\belowdisplayshortskip}{0pt}
+}
+\newcommand\figuredefstextsize{%
+%   \small
+%  \large  
+  \setlength{\abovedisplayskip}{0pt}%
+  \setlength{\abovedisplayshortskip}{0pt}%
+  \setlength{\belowdisplayskip}{0pt}%
+  \setlength{\belowdisplayshortskip}{0pt}
+}
+
+\usepackage{siunitx}  % To format numbers
+
+\setlength{\textfloatsep}{20pt}
+
+\usepackage{balance}
+
+% \newfont{\mycrnotice}{ptmr8t at 7pt}
+% \newfont{\myconfname}{ptmri8t at 7pt}
+% \let\crnotice\mycrnotice%
+% \let\confname\myconfname%
+
+\newcommand\world[3]{%
+   {\begin{array}{l} ( %\left(
+      #1, \\ \phantom{(}
+      #2, \\ \phantom{(}
+      #3          
+   ) \end{array}}
+}  
+
+\newcommand\note[1]{\text{\small#1}}
+\newcommand\bnote[1]{\textbf{\small#1}}
+
+% \newcommand\note[1]{\footnotesize\text{#1}}
+% \newcommand\bnote[1]{\footnotesize\textbf{#1}}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta}

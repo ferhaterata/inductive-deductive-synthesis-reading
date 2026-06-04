@@ -1,0 +1,231 @@
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\MW} ⃰  \ (\name{Monotonic Writes Specification}) 
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         \Set[T × K]
+         & \note{Session puts. ($C × T$ uniquely identifies puts.)}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         ∅
+         & \note{No initial dependencies}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × \Set[C × T])
+         & \note{Map from each key $K$ to its value $V$, and puts already applied.}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, ∅〉}]
+         & \note{}
+      \\
+      & \\
+         \GetReqPayload ≔ \GetResPayload ≔ \Unit
+         & \note{Get payload types}
+      \\
+         \getReq \ (\_) (\_, p)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈○, p〉
+         & \note{Session past puts as request payload, State unchanged}
+      \\
+         \getGuard \ (\_) (\_) (\_, \_, \_) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \ret \true
+         & \note{}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, \_〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret〈 v, ○, ς 〉
+         & \note{No payload}
+      \\
+         \getRes \ (\_, \_) (\_) (\_, p) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret p
+         & \note{State unchanged.}
+      \\
+      & \\
+         \PutReqPayload ≔ T × \Set[T]
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\_, p) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         \llet t ← |p| + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \llet p' ← p ∪ \{〈t, k〉\}         
+         & \note{The put is added to session puts.}
+      \\ \t
+         \ret〈〈t, p|ₖ〉, p'〉
+         & \note{Session puts for the key are sent as request payload.}
+      \\
+         \putGuard \ (k, \_) (〈t, p〉) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \llet〈\_, p'〉← ς (k)
+      & \\ \t
+         \ret p ⊆ p'|_c
+         & \note{Previous puts of session already applied.}
+      \\
+         \lput \ (k, v) (〈t, \_〉) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \llet〈\_, p'〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret ς [k ↦ 〈v, p' ∪ \{〈c,t〉\}]
+      & \\
+      & \\
+      p|ₖ ≔ \{ t \ | \ 〈t, k〉∈ p \}
+      & \\
+      p|_c  ≔ \{ t \ | \ 〈c, t〉∈ p \}
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Monotonic Writes Specification}
+   \label{fig:monotonic-writes-spec}
+\end{figure}
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\MW} \ (\name{Monotonic Writes Implementation}) 
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+%       \\ \t
+%          T \ ×
+%          & \note{Latest timestamp, and}
+      \\ \t         
+         K ↦ T
+         & \note{Latest timestamp of puts for the key.}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+%          〈0, \overline{k ↦ 0}〉
+         \overline{k ↦ 0}
+         & \note{No initial puts}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V \ ×
+         & \note{Map from each key $K$ to its value $V$, and}
+      \\ \t \phantom{K ↦ (}
+         C ↦ T)
+         & \note{latest puts applied from sessions.}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, \overline{c ↦ 0}〉}]
+         & \note{}
+      \\
+      & \\
+         \GetReqPayload ≔ \GetResPayload ≔ \Unit
+         & \note{Get payload types}
+      \\
+         \getReq \ (\_) (\_, σ)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈○, σ〉
+         & \note{Session past puts as request payload, State unchanged}
+      \\
+         \getGuard \ (\_) (\_) (\_, \_, \_) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \ret \true
+         & \note{}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, \_〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret〈 v, ○, ς 〉
+         & \note{No payload}
+      \\
+         \getRes \ (\_, \_) (\_) (\_, σ) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret σ
+         & \note{State unchanged.}
+      \\
+      & \\
+         \PutReqPayload ≔ T
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\_, p) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         t ← p(k)
+         & \note{}
+      \\ \t
+         \llet p' ← p [ k ↦ t + 1]
+         & \note{The timestamp of the latest put for key is advanced.}
+      \\ \t
+         \ret〈t, p'〉
+         & \note{Latest put timestamp for the key is sent as request payload.}
+      \\
+         \putGuard \ (k, \_) (t) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \llet〈\_, p'〉← ς (k)
+      & \\ \t
+         \ret  p'(c) = t
+         & \note{Previous puts of session already applied.}
+      \\
+         \lput \ (k, v) (t) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \llet〈\_, p'〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret ς [k ↦ 〈v, p' [c ↦ t + 1]〉]
+         & \note{}
+      \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Monotonic Writes Implementation}
+   \label{fig:monotonic-writes-impl}
+\end{figure}

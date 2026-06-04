@@ -1,0 +1,33 @@
+\section{Specifications and the \sys{} Suite Dataset}
+\label{app:consistency-specs}
+
+Of the seven specifications evaluated in \cref{sec:eval}, one is Chapar's published causal-consistency spec~\cite{chapar} and the other six are \sys{} suite specs we wrote with a formal-verification and distributed-systems expert ($1{,}018$ lines of \coq{} across five spec files; RYW+MW is the joint composition of RYW and MW with no separate spec; \cref{tab:eval-specs-summary}). Formal definitions are in \cref{app:suite}, which also gives two reference implementations of \sys{} suite CC (vector-clock and dependency-map variants) and the Lloyd-Freedman protocol (the COPS causal-consistency protocol) as a systems-scale reference.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{The seven specifications. Chapar CC is a published spec; the six \sys{} suite specs are expert-written for this paper. \emph{Property} summarises the consistency guarantee; \emph{LoC} is lines of \coq{} for the spec definition.}
+\label{tab:eval-specs-summary}
+\begin{tabular}{@{}l l p{0.50\linewidth} r@{}}
+\toprule
+Specification    & Family       & Property                                                                              & LoC \\
+\midrule
+Chapar CC        & Chapar       & cross-client causal consistency, defined over execution traces                        & n/a \\
+\midrule
+Read-Your-Writes & \sys{} suite & a client reads its own most recent write                                              & $159$ \\
+Monotonic Writes & \sys{} suite & a client's writes are observed in order                                               & $158$ \\
+Monotonic Reads  & \sys{} suite & a client's reads respect the order of observed writes                                 & $185$ \\
+RYW+MW           & \sys{} suite & composition of RYW and MW (no separate spec)                                          & n/a \\
+CC  & \sys{} suite & cross-client causal consistency via explicit dependency sets                          & $248$ \\
+LCC              & \sys{} suite & causal consistency parameterised by per-message labels and per-client interest masks  & $268$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Common shape.}
+Every spec is a \coq{} \texttt{Module Type} with the same seven method signatures (\texttt{getReq}, \texttt{getGuard}, \texttt{get}, \texttt{getRes}, \texttt{putReq}, \texttt{putGuard}, \texttt{put}), a \texttt{State} type, an \texttt{Update} type, and an operational semantics on client-replica configurations. \sys{} consumes this shape directly.
+
+\paragraph{Generality.}
+\sys{} is not tuned to any individual spec: the same agent, prompts, and tools handle every spec we evaluate. Any specification matching the \texttt{Module Type} shape above is a candidate target for the same loop.

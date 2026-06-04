@@ -1,0 +1,135 @@
+% % Abstract
+% \begin{abstract}
+% % \mz{This is extremely confusing to me. We are not validating arbitrary generated code, we are figuring out a way to generate code that is correct from the beginning (by also providing a proof). Also, we are not validating for efficiency, and validating for efficiency is way easier than validating for correctness (just benchmark the code). We gotta think really hard about how to crisply introduce the problem, can't handwave here. To me the problem is that coding agents can generate large software systems but in some domains, such as distributed systems, it's hard to tell whether the systems are correct, even with extensive testing.}
+
+% % AI is great at generating code for many problems, and even at automatically testing and refining its own code, but one place where it falls short is for tasks requiring formal guarantees about rare cases, which are too rare to cover by testing. Indeed, even humans regularly make mistakes on those, both in writing and reviewing code. Distributed systems are a prime example, where we want to know, for instance, that a certain consistency property is met by reads and writes to a system under all possible interleavings of events.
+
+% AI is great at generating code for many problems, and even at automatically testing and refining its own code. However, it  falls short for tasks requiring formal guarantees about rare cases, which are too rare to cover by testing. 
+% % Indeed, even humans regularly make mistakes on those, both in writing and reviewing code. 
+% Distributed systems are a prime example, where we want to know, for instance, that a certain consistency property is met by reads and writes to a system under all possible interleavings of events.
+% Mechanized formal verification can guarantee such comprehensive correctness, but typically demands months to years of specialized human effort, and agents struggle to apply it. 
+% % Though coding is becoming easier with AI assistants, engineering \textit{correct} systems remains difficult, particularly for complex distributed environments.
+% % like large-scale datastores. 
+% % In such settings, even exhaustive testing falls short, as bugs lurk in rare interleavings of concurrent events and emerge only at scale.
+% % Mechanized formal verification (also called certification) guarantees comprehensive correctness, yet it has demanded months to years of specialized expert effort.
+% % Generating certified systems remain out of reach for today's coding agents.
+% As evidence,
+% we ran SOTA coding agents (e.g. Claude Code with Opus 4.7, Codex with GPT 5.5) on the widely researched tasks of designing distributed key-value stores with various properties, and they succeed on only 2/7 specifications. 
+% In this paper, we provide the first effective approach, Inductive Deductive Synthesis (IDS), which incrementally and jointly synthesizes the implementation and the proof, and learns from failed attempts to systematically try promising strategies.
+% The resulting agentic system, \sys, succeeds in generating certified distributed systems on all 7/7 specifications in $\sim 6.8$ hours and \$$106$ per spec on average, \red{O(1000)$\times$} faster than humans, and \red{Y$\times$} cheaper than SOTA agents.
+% Further, \sys implementations are not only proven but also performant by incorporating \textit{performance} feedback, enabling it to outperform published verified systems by up to \red{3$\times$}.
+
+% \medskip
+% \noindent\textit{[Proposed shorter draft below for review --- pick one and remove the other:]}
+% \smallskip
+
+% % With IDS, we actually get 7/7 [ideally at comparable or lower inference cost].
+
+% % AI-generated code is now prevalent, but
+% % Coding agents are now prevalent, but 
+% % validating its correctness and efficiency is a new challenge~-- especially for distributed systems, where bugs hide in rare interleavings that testing may not expose but surface catastrophically at scale. 
+% % Formal verification can guarantee full functional correctness, but at the cost of months to years of expert manual effort per system.
+
+
+% % We present \sys, an agentic certified synthesizer that, given a specification, jointly discovers an implementation and corresponding formal proof of correctness  with no human effort on code or proof.
+% % \mz{I don't think we want to focus on this. I think we want to focus on our idea of Inductive Deductive Synthesis or whatever we call it, and say the key idea powering ACS is IDS or whatever. Then say we implement this as a multi agent system. Papers about multi agent architecture are often pretty low quality and subjective so we don't want to focus on the exact agent prompts and roles as the contribution.}
+% % \sys{} is a multi-agent architecture where LLMs apply a combination of deductive and inductive synthesis to jointly search for implementations and proofs. 
+% % \mz{Like what? People in NeurIPS will have NO IDEA what you mean. None of them have probably used Coq or Daphne before so you really have to spell it out. }
+% % A proof checker acts as an \emph{oracle} on both complete and \emph{partial} proofs, enabling early pruning of infeasible paths.
+% % \sys{} explores design choices (data structures, messages, and protocol logic) beyond what is feasible with manual effort. Further, it benchmarks verified implementations on a distributed testbed, steering the search toward performant designs. On 7 out of 7 consistency specifications (including causal consistency and read-your-writes), \sys{} produces verified implementations in $\sim\,7$ hours on average (\red{X$\times$} faster than experts) and outperforms published systems by up to $\sim\,3\times$.
+
+
+
+% % ===== PRIOR (LONGER) DRAFT — kept for reference =====
+% % \red{[to be updated to start with coding tools being dominant]}
+% % Distributed systems remain among the hardest systems for engineers to design and implement correctly.
+% % Coding agents are now the dominant tool for writing code. Validating that the code is correct has emerged as the new bottleneck~-- especially for distributed systems, where bugs hide in rare interleavings of messages, failures, and concurrent state that testing cannot catch but that surface, often catastrophically, at scale.
+% % Their high-scale is what requires them to be distributed, to scale out. But this large-scale is exactly what causes problems: when they're run at scale, even rare edge-case bugs surface and can cause significant errors.
+% % Formal verification techniques promise to ensure correctness but require \textit{many months to years} of expert effort per algorithm and implementation, keeping machine-checked correctness guaranties out of reach for most systems.
+% % LLM-based coding agents have proven effective for general software engineering, they continue to struggle with the class of long-horizon tasks that such verification efforts fall into.
+% % We present \sys, an autonomous agent system that, given a formal specification of a distributed system,
+% % consistency model \mohsen{We might soon have more than consistency}
+% % discovers a complete implementation and proves it correct in Coq, with zero human intervention and zero model training. \sys exploits a key property of proof assistants:
+% % they are \emph{perfect verification oracles} that, if structured correctly, can provide ground-truth feedback on every attempt, \textit{including partial attempts}. This enables a multi-level agent architecture that explores the implementation design space (data structures, messages, and protocol logic) efficiently and at a scale beyond human experts, avoiding design spaces that are not feasible. Furthermore, after generating a verified solution, \sys benchmarks it on a distributed testbed and feeds the resulting performance measurements back into the search for more efficient implementations.
+% % We evaluate \sys on a variety of key-value store specifications; on all \red{X} specifications, including causal consistency and read-your-writes, \sys successfully produces a verified implementation in \red{X} hours on average – \red{XXX$\times$} faster than human experts – while outperforming their existing SOTA systems from the literature by \red{+XX\%} to \red{+100\%}.
+
+% % The agent incrementally generates the implementation and proofs in a process reminiscent of deductive synthesis, and leverages the oracle to validate the proofs.
+% % % with the oracle guaranteeing that only correct solutions survive.
+% % Once an implementation is generated and verified,
+% % the agent benchmarks it on a distributed testbed and feeds the resulting performance measurements back into the search for more efficient implementations.
+% % The central finding is that \sys-discovered implementations
+% % are not merely correct but up to 2$\times$ faster than existing implementations,
+% % because broader design-space exploration finds strategies that
+% % experts, constrained by the cost of manual proof, never reach.
+
+% % Starting with a specification, \sys generates BOTH an implementation. 
+
+% % Our experiments show that \sys's design significantly outperforms 
+
+% % Furthermore, \sys does this for a wide range of systems and correctness properties, producing verifiably correct implementations that also outperform their existing SOTA systems from the literature by \red{+XX\%} to \red{+YY\%}.
+
+% % \sys does this in a matter of hours, synthesizing correct and performant implementations along with proofs that formally certify the implementation matches the specification for \textit{all possible scenarios}. 
+% \end{abstract}
+
+
+% % % ===== REVISED ABSTRACT =====
+% % \begin{abstract}
+% % LLM-based coding agents have become the dominant tool for writing software, yet generating code that is \emph{provably} correct remains out of reach: agents make reasoning mistakes, problems are underspecified, and tests cannot cover the rare-but-catastrophic edge cases that arise in distributed systems at scale.
+% % Formal verification promises machine-checked correctness guarantees but demands \textit{many months to years} of expert effort per system, keeping it inaccessible in practice.
+% % We present \sys, an autonomous agent system that, given a formal specification of a distributed system, jointly discovers a complete implementation and proves it correct in Coq --- with zero human intervention and zero model fine-tuning.
+% % \sys exploits a key property of proof assistants: they act as \emph{perfect verification oracles} that provide ground-truth correctness feedback on every attempt, \textit{including partial attempts}.
+% % This enables a multi-level agent architecture that co-evolves implementation and proof, exploring the design space (data structures, messages, and protocol logic) far more broadly than any human expert by pruning infeasible paths early.
+% % Once a verified implementation is found, \sys benchmarks it on a distributed testbed and feeds throughput measurements back into the search, yielding implementations that are both correct and performant.
+% % We evaluate \sys on \red{X} key-value store specifications, including causal consistency and read-your-writes.
+% % On every specification, \sys autonomously produces a verified Coq implementation in \red{X} hours on average --- \red{XXX$\times$} faster than human experts --- while outperforming state-of-the-art systems from the literature by \red{+XX\%} to \red{+100\%}.
+% % \end{abstract}
+% % % ===== END REVISED ABSTRACT =====
+
+
+% % % Abstract
+% % \begin{abstract}
+% % Formally verifying distributed systems requires months of expert effort per algorithm,
+% % keeping machine-checked correctness guarantees out of reach for most systems.
+% % We present \sys, an autonomous agent system that,
+% % given a formal specification of a distributed key-value store,
+% % % consistency model \mohsen{We might soon have more than consistency}
+% % discovers a complete implementation and proves it correct in Coq, with
+% % zero human intervention and zero model training.
+% % \sys exploits a key property of proof assistants:
+% % they are \emph{perfect verification oracles} that provide ground-truth feedback on every attempt.
+% % This enables a multi-level agent architecture
+% % that explores the implementation design space (data structures, messages, and protocol logic) 
+% % at a scale beyond human experts.
+% % The agent incrementally generates the implementation and proofs in a process reminiscent of deductive synthesis, and leverages the oracle to validate the proofs.
+% % % with the oracle guaranteeing that only correct solutions survive.
+% % Once an implementation is generated and verified,
+% % the agent benchmarks it on a distributed testbed and feeds the resulting performance measurements
+% % back into the search for more efficient implementations.
+% % We evaluate \sys on XXX consistency specifications
+% % including causal consistency and read-your-writes.
+% % For each, \sys autonomously produces a verified implementation
+% % in XXX minutes on average.
+% % The central finding is that \sys-discovered implementations
+% % are not merely correct but up to 2$\times$ faster than existing implementations,
+% % because broader design-space exploration finds strategies that
+% % experts, constrained by the cost of manual proof, never reach.
+% % \end{abstract}
+
+
+
+\begin{abstract}
+    
+% AI is great at generating code, and even at automatically testing and refining it.
+% However, it falls short on tasks that require formal guarantees for rare cases that testing cannot cover.
+% AI increasingly excels at generating, testing, and refining code. However, it falls short on tasks requiring formal guarantees of full coverage that testing alone cannot provide.
+
+% in which we want to know, for instance, that a consistency property holds for reads and writes under every possible interleaving of events.
+AI agents increasingly excel at generating, testing, and refining code.
+However, they fall short on tasks requiring formal guarantees of full coverage that testing alone cannot provide.
+Distributed systems are a prime example: properties such as consistency between reads and writes must hold under every possible interleaving of events.
+Mechanized formal verification can guarantee such correctness, but typically demands months to years of expert effort.
+As evidence, even SOTA coding agents (Codex with GPT-5.4 and Claude Code with Opus 4.6) succeed on only 2/7 distributed key-value-store specifications.
+In this paper, we present the first effective approach to addressing this gap, Inductive Deductive Synthesis (\sys), which jointly and incrementally synthesizes implementation and proof, and learns from failed attempts to systematically try promising strategies.
+Built as an agentic LLM system, \sys achieves 7/7 in about $6.8$ hours and \$$106$ per spec on average, roughly $200\times$ faster than expert effort and $17\%$ cheaper than SOTA agents.
+\sys further incorporates performance feedback into the same loop, yielding implementations up to $3\times$ faster than published verified systems.\footnote{Code available at \url{https://github.com/skydiscover-ai/skydiscover}.}
+\end{abstract}

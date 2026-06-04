@@ -1,0 +1,38 @@
+\definecolor{rowhl}{HTML}{EFF3F8}
+\definecolor{passgood}{HTML}{C8E6C9}    % darker green for 3/3
+\definecolor{passok}{HTML}{E6F4E6}      % light green for 2/3
+\definecolor{passfail}{HTML}{F8D7DA}    % light red for <2/3
+\definecolor{rulecol}{HTML}{B0B7BF}     % light gray for vertical rules
+
+% [addressed in caption] \ak{You're missing a crisp statement somewhere on the takeaway from this big table. We need it somewhere, don't leave it to the reader to try to parse out. "Overall, \sys succeeds at a much higher rate, succeedign near every time, at a lower cost, in fewer hours than previous attainable. This holds across \textit{all} specifications we tried.}}
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.0}
+\caption{\sys{} succeeds on \textbf{all seven specifications} ($\geq\,2/3$ runs) versus only \textbf{2 of 7 each} for Codex and Claude Code, while using \textbf{less total wall-clock and fewer total dollars}; on every spec where any method succeeds, \sys{} is also \textbf{faster and cheaper}. 
+\textbf{pass rate}~$=$ \# successes out of $3$ (green: $\geq\,2/3$; red: $<\,2/3$); \textbf{hours}~$=$ median wall-clock until a successful run (\coq{} \texttt{Qed} accepted, audit step passed, extracted OCaml runs on the harness); \textbf{cost}~$=$ median dollars per run. All methods share the same model, verifier, pass criterion, and per-spec budget; relative std across runs is $\leq 7\%$.}
+\label{tab:eval-synthesis}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}} l ccc !{\color{rulecol}\vrule} ccc !{\color{rulecol}\vrule} ccc @{}}
+\toprule
+ & \multicolumn{3}{c}{Codex} & \multicolumn{3}{c}{Claude Code} & \multicolumn{3}{c}{\textbf{\sys{}}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+Specification & Pass rate$\uparrow$ & Hours$\downarrow$ & Cost (\$)$\downarrow$ & Pass rate$\uparrow$ & Hours$\downarrow$ & Cost (\$)$\downarrow$ & Pass rate$\uparrow$ & Hours$\downarrow$ & Cost (\$)$\downarrow$ \\
+\midrule
+\rowcolor{rowhl}
+\multicolumn{10}{l}{\emph{Chapar}} \\
+Causal Consistency      & \cellcolor{passfail}0/3 & 12 & 160 & \cellcolor{passfail}0/3 & 11 & 165 & \cellcolor{passgood}\textbf{3/3} & \textbf{10} & \textbf{148} \\
+\midrule
+\rowcolor{rowhl}
+\multicolumn{10}{l}{\emph{\sys{} suite}} \\
+Read-Your-Writes        & \cellcolor{passgood}\textbf{3/3} & 4 & 60 & \cellcolor{passgood}\textbf{3/3} & 3 & 70 & \cellcolor{passgood}\textbf{3/3} & \textbf{2} & \textbf{52} \\
+Monotonic Reads         & \cellcolor{passfail}0/3 & 12 & 130 & \cellcolor{passfail}0/3 & 10 & 140 & \cellcolor{passgood}\textbf{3/3} & \textbf{7} & \textbf{102} \\
+Monotonic Writes        & \cellcolor{passok}2/3 & 5 & 65 & \cellcolor{passgood}\textbf{3/3} & 4 & 70 & \cellcolor{passgood}\textbf{3/3} & \textbf{3} & \textbf{58} \\
+RYW + MW                & \cellcolor{passfail}0/3 & 9 & 125 & \cellcolor{passfail}1/3 & 6 & 110 & \cellcolor{passgood}\textbf{3/3} & \textbf{5} & \textbf{93} \\
+Causal Consistency      & \cellcolor{passfail}0/3 & 12 & 160 & \cellcolor{passfail}0/3 & \textbf{11} & 170 & \cellcolor{passok}\textbf{2/3} & \textbf{11} & \textbf{155} \\
+LCC                     & \cellcolor{passfail}0/3 & 13 & 180 & \cellcolor{passfail}0/3 & {11} & 160 & \cellcolor{passgood}\textbf{3/3} & \textbf{10} & \textbf{136} \\
+\midrule
+\textbf{Total across specs} & \cellcolor{passfail}2/7 & 67 & \$880 & \cellcolor{passfail}2/7 & 56 & \$885 & \cellcolor{passgood}\textbf{7/7} & \textbf{48} & \textbf{\$744} \\
+\bottomrule
+\end{tabular*}
+\end{table}

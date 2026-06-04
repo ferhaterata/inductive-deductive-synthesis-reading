@@ -1,0 +1,104 @@
+\section{Related Work}
+\label{sec:related}
+
+% Producing certified code with an LLM involves three ?: an implementation, a specification of its guarantees, and a machine-checked proof that the implementation satisfies the specification. We position \sys{} against three lines of work that have each addressed one of these in isolation.
+Verified code generation with an LLM has three components: (1) a specification of desired guarantees, (2) an implementation, and (3) a machine-checkable proof that the implementation satisfies the specification. Prior work falls into four threads: three each address one component (specification generation, program generation with an evaluator, automated proof generation), and verified synthesis attempts (2) and (3) jointly. \sys{} pursues this last class on distributed-systems specifications.
+
+\textbf{Specification generation. \ }
+A complementary line uses LLMs to recover formal specifications from code or intent~\cite{nl2postcond,autospec};
+Clover~\cite{clover} generates formal annotations from natural language specifications, and then checks the consistency of code with the formal and natural specifications of Dafny benchmarks.
+\sys{} takes such specifications as input rather than producing them.
+
+
+% \paragraph{LLM agents and program discovery.}
+\textbf{Program generation with an evaluator. \ }
+% 
+A separate strand of work treats program construction as search guided by evaluator feedback. 
+Coding agents get feedback from given or self-generated tests~\cite{swe-agent,reflexion},
+or from communication with other specialized agents~\cite{metagpt,chatdev,autogen}.
+% and multi-agent systems extend this with role specialization
+% 
+Algorithmic discovery systems use a scoring function to drive evolution~\cite{funsearch,alphaevolve} or deep reinforcement learning~\cite{alphadev}. 
+% 
+\sys{} shares the evaluator-guided search scheme;
+however, instead of tests or scores, it uses a proof assistant.
+In contrast to sampled signals (tests over traces, specific inputs, or estimated scores),
+type-checked proofs guarantee correctness on all inputs.
+% accepted outputs are guaranteed on \emph{all} inputs.
+% type-checking 
+% The proof checker scores partial as well as complete candidates, and 
+
+
+% \paragraph{Automated proof generation.}
+\textbf{Automated proof generation. \ }
+Most prior LLM-for-verification work fixes the implementation and specification, asking the model only for the proof.
+For SMT-backed languages such as Dafny~\cite{dafny} and Verus~\cite{verus}, recent systems synthesize the loop invariants and assertions a verifier needs, either via compiler-feedback loops~\cite{autoverus} or targeted invariant generation~\cite{laurel}.
+% 
+For tactic-driven assistants such as Lean~\cite{lean} and \coq{}~\cite{coq}, prover systems have been trained on databases of prior formal proofs~\cite{coqgym}, natural-language proofs~\cite{wang2024theoremllama}, and conjectured theorems~\cite{dong2025stp}.
+Approaches differ in scope: some generate full proofs in one pass~\cite{deepseek-prover-v2,kimina-prover,baldur}; others decompose the proof into sub-goals~\cite{li2026goedel,zhao2024subgoalxl,dsp}; tactic-level methods iteratively predict and repair the next proof step from the current proof state and verifier feedback~\cite{hubert2025olympiad,leandojo,copra,apollo,ruida2025ma}.
+\sys{} differs by jointly generating the implementation and proof, and further optimizing performance.
+
+
+% \paragraph{Verified synthesis from specifications.}
+\textbf{Verified synthesis. \ }
+The long-standing goal of producing a program and its correctness proof from a specification alone goes back to deductive synthesis~\cite{manna-waldinger,synquid} and counterexample-guided inductive synthesis~\cite{sketch,cegis}, but the inference rules and candidate-search space confined results to small individual functions.
+% \sys{} is showing that these barriers can be broken in the LLM era.
+% Verified-code-generation in the LLM era inherit that scope:
+The LLM era rekindles this dream.
+%  though significant challenges persist.
+VERINA~\cite{verina} provides a benchmark to evaluate specification, code, and proof generation, evaluates existing tools, and underscores significant challenges for automatic provers.
+Recent LLM-driven verified-synthesis work targets SMT-backed languages: AlphaVerus~\cite{alphaverus} bootstraps verified Verus code via self-improving translation, scaling to function-level tasks.
+%
+At the other extreme,
+% In the past decade,
+hand-built verified distributed systems, such as IronFleet's Paxos-replicated state machines~\cite{ironfleet}, Verdi's Raft~\cite{verdi}, FSCQ's crash-safe file system~\cite{fscq}, Anvil's verified Kubernetes controllers~\cite{anvil}, Chapar's causally-consistent KV stores~\cite{chapar}, and Iris-based concurrent and distributed verification~\cite{iris,grove,perennial} demonstrate that machine-checkable guarantees \emph{are} achievable at systems scale, but at months to years of expert proof effort.
+% not implementation, dominating the cost.
+% \sys{} shows that synthesis and certification may not mean small scale or time-consuming anymore.
+\sys{} shows that verified synthesis need not be small-scale or slow: it automatically generates implementations and their machine-checkable correctness proofs for distributed key-value stores in hours rather than months.
+
+% \paragraph{Limitations. \ }
+% \sys{}' guarantees are conditional on the input specification (a formal \coq{} \texttt{Module Type}; we do not synthesize specs); we evaluate on distributed key-value-store consistency only, with generality to other domains conjectured; and \sys{} can fail on the hardest cases ($2$-of-$3$ pass rate on \sys{} suite CC). \cref{app:limitations-impacts} has full discussion.
+
+
+
+
+
+% ===== PRIOR VERSION (commented out for reference) =====
+% \section{Related Work}
+% \label{sec:related}
+%
+% \ak{this is very overwhelming right now, cites so many different things. I feel like a good related work lays out some of the key existing points in the space, and largely helps the reader position our work with respect to them, whereas right now it reads more as focused on just listing points. }
+%
+% \paragraph{Automated verification.}
+% Given an implementation and a specification, automated verification seeks to discharge the resulting proof obligations with minimal human effort.
+% Two families of tools define the landscape.
+% %
+% \emph{Automated theorem provers~(ATP)} back languages such as Dafny~\cite{dafny} and Verus~\cite{verus}: an SMT solver handles most reasoning while the user supplies proof hints---loop invariants, assertions, and ghost code.
+% Recent LLM-based methods generate these hints automatically.
+% For Verus, AutoVerus~\cite{autoverus} uses compiler-feedback loops, AlphaVerus~\cite{alphaverus} bootstraps proofs via self-improving translation, VeruSyn~\cite{verusyn} scales through synthetic training data, RAG-Verus~\cite{rag-verus} adds retrieval augmentation, and VeriStruct~\cite{veristruct} targets data-structure modules.
+% For Dafny, DafnyPro~\cite{dafnypro}, Atlas~\cite{atlas}, dafny-annotator~\cite{dafny-annotator}, Laurel~\cite{laurel}, and Reform~\cite{reform} attack invariant and assertion synthesis.
+% %
+% \emph{Interactive theorem provers~(ITP)}---Coq~\cite{coq}, Lean~\cite{lean}---require explicit tactic proofs but expose richer, step-level feedback to LLMs.
+% Approaches span reinforcement learning and expert iteration on tactic signals~\cite{alphaproof, deepseek-prover-v1, deepseek-prover-v15, deepseek-prover-v2, goedel-prover, goedel-prover-v2, kimina-prover, seed-prover, leanabell-v2, stp, hypertree, baldur, llemma, gptf, pact, dsp}, in-context error-feedback loops~\cite{copra, leanagent, apollo, lean-copilot, palm-proofs, coqpilot, lego-prover}, retrieval-augmented tactic prediction~\cite{rango, graph2tac, tactician, proverbot9001, coqgym, passport, leandojo}, and classical-prover bridges~\cite{sledgehammer, coqhammer, thor, diva}.
+% %
+% All of these methods take the theorem statement as given; \sys{} instead discovers the implementation and its correctness proof jointly.
+%
+% \paragraph{Verified code synthesis.}
+% Classical deductive synthesis---from Manna and Waldinger~\cite{manna-waldinger} through refinement calculi~\cite{morgan-refinement}, type-directed search~\cite{synquid}, sketching and CEGIS~\cite{sketch, cegis}, and tactic-based extraction in NuPRL and KIDS~\cite{nuprl, kids}---automates the derivation of correct-by-construction code from specifications, but the underlying heuristics have not scaled beyond function-level problems.
+% On the LLM side, coding agents close their feedback loop on tests or self-critique~\cite{swe-agent, agentless, swebench, openhands, self-refine, reflexion}, and discovery-with-evaluator systems run evolutionary or RL search against scoring functions~\cite{funsearch, alphaevolve, alphadev, alphacode, skydiscover2026}; neither family produces formal correctness guarantees---their outputs are compile-checked, tested, or scored, but never proven correct on unseen inputs~\cite{vibe-reasoning, vibe-safe}.
+% Among the few works that couple code generation with formal verification,
+% Clover~\cite{clover} generates and consistency-checks (code, specification, annotation) triples in Dafny,
+% and Dafny-Synthesis~\cite{dafny-synthesis} targets AI-assisted synthesis of verified Dafny methods on 50 problems.
+% The VERINA benchmark~\cite{verina} evaluates the full verifiable-code-generation pipeline---code generation, specification generation, and proof generation---in Lean on 189 human-validated tasks; its comparison (Table~1 of~\cite{verina}) shows that very few existing systems address all three tasks.
+% Hand-proved verified systems---Paxos in Dafny~\cite{ironfleet}, Raft in Coq~\cite{verdi}, causally consistent key-value stores in Coq~\cite{chapar}, crash-safe file systems~\cite{fscq}, and systems in Verus~\cite{anvil, verismo} and Iris~\cite{grove, iris}---demonstrate that end-to-end machine-checkable correctness is achievable, but at months to person-years of manual effort per system.
+% \sys{} combines the automation goal of synthesis with the fidelity of these verified systems: an LLM agent driven by the proof assistant itself generates the (implementation, theorem, proof) triple end-to-end at systems scale.
+%
+% \paragraph{Specification generation.}
+% A prerequisite to both verification and synthesis is a formal specification.
+% Recent work uses LLMs to bridge the gap between informal intent and formal contracts.
+% nl2postcond~\cite{nl2postcond} generates postconditions from natural-language function descriptions,
+% AutoSpec~\cite{autospec} combines static analysis with LLM queries and program verification to infer specifications from existing code,
+% and SpecGen~\cite{specgen} generates formal program specifications via LLMs.
+% These efforts target specification \emph{in isolation}: given code or documentation, produce the spec.
+% \sys{} addresses a complementary problem---given a specification, synthesise the implementation and its machine-checked proof---and thus consumes rather than produces specifications.
+% ===== END PRIOR VERSION =====

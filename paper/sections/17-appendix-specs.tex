@@ -1,0 +1,61 @@
+\clearpage
+\section{\sys{} Suite}
+\label{app:suite}
+
+\sys{} suite is the benchmark dataset of six distributed key-value-store specifications we release alongside the system; together with Chapar's published causal-consistency spec~\cite{chapar}, they form the seven specifications evaluated in \cref{sec:eval}. Each specification fixes (i) the abstract spec state and operations the application sees, (ii) the concrete replica state and operations the implementation runs, and (iii) the consistency property the implementation must satisfy. This appendix gives the formal definition of every spec, plus the reference implementations we benchmark in \cref{sec:eval}. The framework setup below introduces the notation: client programs (\cref{fig:prog-def}), the seven-method \texttt{AlgDef} interface (\cref{fig:alg-def}), the configuration syntax (\cref{fig:configuration-syntax}), the concurrent operational semantics (\cref{fig:updated-conc-op-sem}), the refinement hierarchy (\cref{fig:refinement-hierarchy}), and a relaxed baseline spec (\cref{fig:relaxed-specification}).
+
+\paragraph{Summary.}
+\Cref{tab:suite-summary} lists the six \sys{} suite specifications plus Chapar's published CC. Each is then introduced in plain English and immediately followed by its formal definition and reference implementation.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}llp{0.45\linewidth}@{}}
+\toprule
+spec & abbreviation & informal guarantee \\
+\midrule
+Read-Your-Writes                          & RYW    & A client's read sees that client's own most recent write. \\
+Monotonic Reads                           & MR     & A client's reads never go back in time relative to writes the client has already seen. \\
+Monotonic Writes                          & MW     & Writes from one client are applied in order at every replica. \\
+Read-Your-Writes $+$ Monotonic Writes     & RYW+MW & Composition of RYW and MW; an implementation must refine both. \\
+Causal Consistency                        & CC     & A read returns a value whose causal predecessors have all been observed at the responding replica. \\
+Labeled Causal Consistency                & LCC    & CC parameterised by per-message topic labels: each client subscribes to a subset of labels and only sees causality enforced on those. \\
+Chapar Causal Consistency                 & Chapar CC & Chapar's published CC specification~\cite{chapar}; see the original paper for its formal definition. \\
+\bottomrule
+\end{tabular}
+\caption{The six \sys{} suite specifications, plus Chapar's published CC for reference.}
+\label{tab:suite-summary}
+\end{table}
+\newpage
+% --- Framework setup figures (programs, AlgDef interface, op-sem, refinement, relaxed spec) ---
+\input{specs/_setup}
+
+\subsection{Read-Your-Writes (RYW)}
+A client's read sees its own most recent write. The session tracks every put the client has issued; the get-guard requires the responding replica to have applied every put in that set (\cref{fig:read-your-writes-spec}). The reference implementation stores per-replica state as a function from key to timestamp (\cref{fig:read-your-writes-impl}).
+\input{specs/_ryw}
+
+\subsection{Monotonic Reads (MR)}
+A client's reads respect the order of writes the client has previously observed. The session keeps the set of writes seen so far; subsequent reads must return values applied no earlier than every write in that set (\cref{fig:monotonic-reads-spec}). The reference implementation stores per-replica state as a function from key to (value, client, timestamp); the get-guard checks every entry against the client's session set on every read (\cref{fig:monotonic-reads-impl}).
+\input{specs/_mr}
+
+\subsection{Monotonic Writes (MW)}
+A single client's writes are observed in order at every replica that observes them. Each replica records, per writing client, the latest applied timestamp; the put-guard rejects any out-of-order delivery (\cref{fig:monotonic-writes-spec}). The reference implementation prepends the timestamp of each new write to a per-key list with no de-duplication, so receivers can re-check ordering on every delivery (\cref{fig:monotonic-writes-impl}).
+\input{specs/_mw}
+
+\subsection{Read-Your-Writes $+$ Monotonic Writes (RYW+MW)}
+Composition of Read-Your-Writes and Monotonic Writes. RYW+MW is the conjunction of RYW and MW rather than an independent property; an implementation satisfies it iff it refines both, so correctness is the joint refinement obligation. The reference combines RYW's read-side check with MW's compare-and-swap on every put (\cref{fig:ryw-mw-impl}).
+\input{specs/_ryw_mw}
+
+\subsection{Causal Consistency (CC) and Labeled Causal Consistency (LCC)}
+\textbf{Causal Consistency (CC).}
+Cross-client causal consistency: every read returns a value whose causal predecessors have all been observed at the responding replica. Dependencies are tracked as explicit sets in the spec state (\cref{fig:causal-cons-spec}), which the implementation must bridge to its concrete representation (typically a per-client vector clock plus a compare-and-swap on the writer's own slot during put). Two reference implementations are given: a per-client vector-clock store (\cref{fig:causal-map-95}) and a Lloyd--Freedman-style protocol (\cref{fig:LloydFreedman-protocol}).
+
+\noindent\textbf{Labeled Causal Consistency (LCC).}
+Causal consistency parameterised by per-message topic labels and per-client interest masks. Every put is tagged with a label, and every client declares which labels it cares about; the get-guard requires the responding replica to have observed every dependency whose label is in the requesting client's mask (\cref{fig:lcc-spec}). To our knowledge this is the first \coq{} formalisation of LCC and the first verified implementation.
+
+\input{specs/_cc_lcc}
+
+\subsection{Chapar Causal Consistency}
+For Chapar CC we use Chapar's published causal-consistency specification~\cite{chapar}; we refer the reader to the original paper for its formal definition. Per-operation cost comparison appears in \cref{app:perf}.

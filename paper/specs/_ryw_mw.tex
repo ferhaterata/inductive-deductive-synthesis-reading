@@ -1,0 +1,117 @@
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         \multicolumn{2}{|l|}{𝐈_{\RYW\text{-}\MW} \ (\name{Read Your Writes and Monotonic Writes Implementation}) }         
+      \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t         
+         K ↦ T
+         & \note{Latest timestamp of puts for the key.}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         \overline{k ↦ 0}
+         & \note{No initial puts}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × C \ × 
+         & \note{Map from each key $K$ to its value $V$, and its originating sessions $C$,}
+      \\ \t \phantom{K ↦ (}
+         C ↦ T)
+         & \note{latest puts applied from sessions}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, 0, \overline{c ↦ 0}〉}]
+         & \note{}
+      \\
+      & \\
+         \GetReqPayload ≔ T
+         & \note{Get payload types}
+      \\
+         \GetResPayload ≔ \Unit
+      & \\
+         \getReq \ (k) (\_, p)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈p(k), p〉
+         & \note{Timestamp of latest put as request payload, State unchanged}
+      \\
+         \getGuard \ (k)(t)(c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, c', p'〉← ς (k)
+      & \\ \t
+         \ret  c = c'  ⇒  p'(c') = t
+%          t ≤ t'
+         & \note{If stored value is from requesting client, his puts not missed.}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, \_, \_〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret〈 v, ○, ς 〉
+         & \note{No payload}
+      \\
+         \getRes \ (\_, \_) (\_) (\_, p) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret p
+         & \note{State unchanged.}
+      \\
+      & \\
+         \PutReqPayload ≔ T
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\_, p) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         t ← p(k)
+         & \note{}
+      \\ \t
+         \llet p' ← p [ k ↦ t + 1 ]
+         & \note{The timestamp of the latest put for key is advanced.}
+      \\ \t
+         \ret〈t, p'〉
+         & \note{Latest put timestamp for the key is sent as request payload.}
+      \\
+         \putGuard \ (k, \_) (t) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \llet〈\_, \_, p'〉← ς (k)
+      & \\ \t
+         \ret p'(c) = t
+         & \note{Previous puts of session already applied.}
+      \\
+         \lput \ (k, v) (t) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \llet〈\_, p'〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, p' [c ↦ t + 1]〉]
+         & \note{}
+      \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Read Your Writes and Monotonic Writes Implementation}
+   \label{fig:ryw-mw-impl}
+\end{figure}

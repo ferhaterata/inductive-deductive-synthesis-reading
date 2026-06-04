@@ -1,0 +1,21 @@
+\begin{table}[h]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{Per-spec implementation choice and proof artifact size. Lemmas $=$ \texttt{Qed} count; lines via \texttt{wc -l}.}
+\label{tab:synth-artifacts}
+\begin{tabular}{l l r r}
+\toprule
+Specification & Implementation & Lines & Lemmas \\
+\midrule
+Chapar CC & per-key store entry with sender clock + dep vector & 3{,}037 & 79 \\
+RYW       & per-key (val, client, ts) assoc-list & 622 & 25 \\
+MW        & per-key (val, client$\to$ts) assoc-list & 722 & 30 \\
+MR        & per-(key, client) assoc-list, replace-on-write & 1{,}063 & 30 \\
+RYW+MW    & per-key (val, client, client$\to$ts) assoc-list & 958 & 28 \\
+\sys{} suite CC & vector clock + per-key VC map + balanced-tree store & 3{,}807 & 121 \\
+LCC       & vector clock + per-key VC map + balanced-tree store + per-client label-set filter & 3{,}924 & 128 \\
+\bottomrule
+\end{tabular}
+\end{table}

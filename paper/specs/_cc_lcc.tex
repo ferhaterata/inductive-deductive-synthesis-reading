@@ -1,0 +1,657 @@
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\CC} ⃰  \ (\name{Causal Consistency Spec}) 
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         〈\Set[C × T × K],
+%          〈K ↦ \Set[C × T],
+         & \note{Session dependencies from puts.}
+      \\ \t \phantom{〈}
+         \Set[\Set[C × T × K]] 〉
+%          \Set[C × T]
+%          & \note{Put timestamp, and Session dependencies}
+%          & \note{Current timestamp, and Session dependencies.}
+         & \note{Session dependencies from gets}
+      \\ \t
+         & \note{($C × T$ uniquely identifies puts.)}         
+%       \\ \t
+%          & \note{($C × T$ uniquely identifies puts.)}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+%          〈0, ∅〉
+         〈∅, ∅〉
+%          \lif (c ≠ c₀) \
+%          〈∅, ∅〉\ 
+%          \lelse  〈[ \overline{k ↦〈c₀, k + 1〉}], ∅〉
+         & \note{No initial dependencies}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × C × T \, × 
+%          K ↦ (C × T × V × \Set [C × T])
+         & \note{Map from each key $K$ to its value $V$, its origin $C × T$,}
+      \\ \t \phantom{K ↦ (}         
+         \Set[C × T × K])
+         & \note{and set of dependencies}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, c₀, 0, ∅〉}]
+%          [\overline{ k ↦ 〈v₀, c₀, k+1, ∅〉}]
+%          & \note{For each key, initial $v₀$ and empty initial dependencies}
+         & \note{Empty initial dependencies}
+      \\
+      & \\
+         \GetReqPayload ≔ 〈\Set[C × T × K],
+         & \note{Get payload types}
+      \\ \phantom{\GetReqPayload ≔ 〈}
+         \Set[\Set[C × T × K]]\>
+%          \GetReqPayload ≔ \Set[C × T]
+         & \note{}
+      \\
+         \GetResPayload ≔ \Set[C × T  × K]
+      & \\
+         \getReq \ (k) (\_, 〈p, G〉)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈〈p|ₖ, G|ₖ〉, 〈p, G〉〉 
+         & \note{Session deps sent as request payload, State unchanged}
+      \\
+         \getGuard \ (k) (〈p, G〉) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, c', t', d'〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret \lforall (λ d. \ ¬ (d'|ₖ ∪ \{〈c', t', k〉\} ⊂ d)) \ G \ ∧
+         & \note{Stored value isn't behind any previously read value.}
+%       & \\ \t
+%          \ret ¬ (d'|ₖ ∪ \{〈c', t', k〉\} ⊂ d|ₖ)
+%          & \note{The stored value is not behind.}
+%       \\ \t
+%          \ret d|ₖ  ⊆  d'|ₖ ∪ \{〈c', t', k〉\} ∨〈c', t', k〉∉ d|ₖ
+%          & \note{Alternative condition}
+      \\ \t \phantom{\ret}
+         c = c' ⇒ p ⊆ d'|ₖ ∪ \{〈c', t', k〉\}
+%          c = c' ⇒ p ⊆ p' ∪ \{ t' \}
+         & \note{Read your writes.}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, c, t, d〉← ς (k)
+      & \\ \t
+%          \llet d' ← d ∪ \{〈c, t, k〉\}
+         \llet d' ← \lif (c ≠ c₀) \ d ∪ \{〈c, t, k〉\} \ \lelse ∅
+         & \note{The dependencies returned to the session}
+      \\ \t
+         \ret〈 v, d', ς 〉
+         & \note{are the entry and its dependencies}
+      \\
+         \getRes \ (\_, \_) (d') (\_, 〈p, G〉) ≔
+%          (C, \CState)(K, V, \GetResPayload) → \Unit
+         & \note{At client: } \bnote{Get Response}
+%       \\ \t
+%          \llet 〈t, d'〉 ← σ
+%          & \note{The received dependencies are}
+      \\ \t
+         \ret 〈p, G ∪ \{ d' \}〉
+%          & \note{added to the dependencies of the session.}
+         & \note{Received dependencies added to session dependencies.}
+%       \\ \t
+%          \ret d'
+      \\
+      & \\
+         \PutReqPayload ≔ T × \Set [ C × T × K ]
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\self, 〈p, G〉) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+%          \llet t ← |\{〈c, \_, \_〉∈ p \ | \ c=\self \}| + 1
+         \llet t ← |p| + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \llet p' ← p ∪ \{〈 \self, t, k 〉\}
+         & \note{The put is added to session dependencies.}
+      \\ \t
+         \ret〈〈t, p ∪ (⋃\, G)〉, 〈p', G〉〉 
+         & \note{Session dependencies are sent as request payload.}
+      \\
+         \putGuard \ (k, \_) (〈t, \_〉) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+%       \\ \t
+%       \llet t ← |\{〈c', \_, \_〉∈ d \ | \ c'=c \}| + 1
+%          & \note{Current put timestamp}
+      \\ \t
+         \llet〈\_, \_, \_, d'〉← ς (k)
+      & \\ \t
+          \ret〈c, t, k〉∉ d'
+          & \note{The new put is not causally before the current stored put.}
+      \\
+         \lput \ (k, v) (〈t, d〉) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+%       \\ \t
+%       \llet t ← |\{〈c', \_, \_〉∈ d \ | \ c'=c \}| + 1
+%          & \note{Current put timestamp}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, t, d〉]
+%          ς' ← ς [k ↦ 〈c, t, v, d〉]
+%       & \\ \t
+%          \ret ς'
+      & \\
+      & \\
+         d|ₖ ≔ \{〈c, t, k〉\ | \ 〈c, t, k'〉∈ d  ∧ k = k' \}
+%          \{〈c', t', k'〉∈ d \ | \ k = k' \}
+      & \\
+         D|ₖ ≔ \{ d|ₖ \ | \ d ∈ D \}
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Causal Consistency Spec}
+   \label{fig:causal-cons-spec}
+\end{figure}
+
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\LCC} ⃰  \ (\name{Labeled Causal Consistency Spec})
+      & \\ \hline
+         \L
+         & \note{Label type}
+      \\
+         \lab : V → \L
+         & \note{Maps each value to its label}
+      \\
+         \clientLabs : C → \Set[\L]
+         & \note{Maps each client to its set of relevant labels}
+      \\
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔
+         & \bnote{Client State}
+      \\ \t
+         〈\Set[C × T × K × \L],
+         & \note{Session dependencies from puts (with labels)}
+      \\ \t \phantom{〈}
+         \Set[\Set[C × T × K × \L]] 〉
+         & \note{Session dependencies from gets (with labels)}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         〈∅, ∅〉
+         & \note{No initial dependencies}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × C × T \, ×
+         & \note{Map from each key $K$ to its value $V$, its origin $C × T$,}
+      \\ \t \phantom{K ↦ (}
+         \Set[C × T × K × \L])
+         & \note{and set of label-annotated dependencies}
+      \\
+         \rInit(r, v₀) ≔
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, c₀, 0, ∅〉}]
+         & \note{Empty initial dependencies}
+      \\
+      & \\
+         \GetReqPayload ≔ 〈\Set[C × T × K × \L]
+         & \note{Get payload types}
+      \\ \phantom{\GetReqPayload ≔ 〈}
+         \Set[\Set[C × T × K × \L]]
+      & \\
+         \GetResPayload ≔ \Set[C × T × K × \L]
+      & \\
+         \getReq \ (k) (\self, 〈p, G〉)  ≔
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \llet L ← \clientLabs(\self)
+      & \\ \t
+         \ret〈〈p|ₖ|_{L}, G|ₖ|_{L}〉, 〈p, G〉〉
+         & \note{Label-filtered deps sent as payload; state unchanged.}
+      \\
+         \getGuard \ (k) (〈p, G〉) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈v', c', t', d'〉← ς (k)
+      & \\ \t
+         \llet L ← \clientLabs(c)
+      & \\ \t
+         \ret \lforall (λ d. \ 
+         & \note{Stored value not behind any previously}
+      \\ \t \ \ \ \
+         ¬ ((d'|ₖ ∪ \{〈c', t', k, \lab(v')〉\})|_{L} ⊂ d)) \ G
+         & \note{read value, for client's labels.}
+      \\ \t
+         ∧ \ c = c' ⇒ p ⊆ d'|ₖ ∪ \{〈c', t', k, \lab(v')〉\}
+         & \note{Read your writes.}         
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, c, t, d〉← ς (k)
+      & \\ \t
+         \llet d' ← \lif (c ≠ c₀) \ d ∪ \{〈c, t, k, \lab(v)〉\} \ \lelse ∅
+         & \note{Label of stored value included in returned dependency.}
+      \\ \t
+         \ret〈 v, d', ς 〉
+         & \note{}
+      \\
+         \getRes \ (\_, \_) (d') (\_, 〈p, G〉) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret 〈p, G ∪ \{ d' \}〉
+         & \note{Received dependencies added to session.}
+      \\
+      & \\
+         \PutReqPayload ≔ T × \Set [ C × T × K × \L ]
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, v) (\self, 〈p, G〉) ≔
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         \llet t ← |p| + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \llet p' ← p ∪ \{〈 \self, t, k, \lab(v) 〉\}
+         & \note{Put with its label added to session dependencies.}
+      \\ \t
+         \ret〈〈t, p ∪ (⋃\, G)〉, 〈p', G〉〉
+         & \note{All session dependencies sent as request payload.}
+      \\
+         \putGuard \ (k, v) (〈t, \_〉) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \llet〈\_, \_, \_, d'〉← ς (k)
+      & \\ \t
+          \ret〈c, t, k, \lab(v)〉∉ d'
+          & \note{The new put has not already been applied.}
+      \\
+         \lput \ (k, v) (〈t, d〉) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, t, d〉]
+      & \\
+      & \\
+         d|ₖ ≔ \{〈c, t, k, l〉\ | \ 〈c, t, k', l〉∈ d  ∧ k = k' \}
+      & \\
+         D|ₖ ≔ \{ d|ₖ \ | \ d ∈ D \}
+      & \\
+         d|_{L} ≔ \{〈c, t, k, l〉\ | \ 〈c, t, k, l〉∈ d  ∧ l ∈ L \}
+         & \note{Filter dependencies to the label set $L$}
+      \\
+         D|_{L} ≔ \{ d|_{L} \ | \ d ∈ D \}
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Labeled Causal Consistency Spec. 
+   Causal consistency — but per topic. Every put is tagged with a label (think: Kafka topic, Slack channel, pub/sub subject). Every client declares which labels it cares about. Causal delivery for a client is enforced only for labels the client is interested in.}
+   \label{fig:lcc-spec}
+\end{figure}
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         \multicolumn{2}{|l|}{𝐈_{\CC_1} \ (\name{Causal Consistency Implementation 1})}
+      \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         C ↦ T
+         & \note{Session vector-clock}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         [\overline{ c ↦ 0 }]
+         & \note{No initial dependencies}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         〈K ↦ V, \
+%          〈K ↦ C × T × V, \
+%          For later C and T stored too
+         & \note{Store}  % ($C × T$ uniquely identifies puts.)
+      \\ \t \phantom{〈}
+          C ↦ T〉          
+%          〈K ↦ V , \ C ↦ T〉
+%          & \note{Dependencies vector-clock (one for all keys)}
+         & \note{Received vector-clock (one for all keys)}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         〈[\overline{ k ↦ v₀}], [\overline{ c ↦ 0 }]〉
+%          & \note{For each key, initial $v₀$ and empty initial dependencies}
+         & \note{Empty initial dependencies}
+      \\
+      & \\
+         \GetReqPayload ≔ C ↦ T
+         & \note{Get payload types}
+      \\
+         \GetResPayload ≔ C ↦ T
+      & \\
+         \getReq \ (\_) (\_, d)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+%       \\ \t
+%          \llet d ← σ 
+%       & \\ \t
+%          \llet σ' ← σ 
+%          & \note{}
+      \\ \t
+%          〈σ', d〉
+%          〈σ, d〉
+         \ret〈d, d〉
+         & \note{Session vector-clock (1) sent as request payload (2) remains unchanged}
+%          Dependencies vector clock sent as request payload}
+      \\
+         \getGuard \ (k)(d)(\_, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, r〉← ς
+%       & \\ \t
+%          \llet c', t', \_, d' ← s[k]
+      & \\ \t
+         \ret r ≥ d
+%          For later: comparison will be with received
+         & \note{Pointwise comparison of vector clocks. Store is ahead of session}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈s, r〉← ς
+      & \\ \t
+         \llet v← s (k)
+      & \\ \t
+         \ret〈 v, r, ς 〉
+%          \ret〈 v, \vc', ς 〉
+%          For later: \vc' passed here         
+         & \note{}
+      \\
+         \getRes \ (\_, \_) (r) (\_, d) ≔
+%          (C, \CState)(K, V, \GetResPayload) → \Unit
+         & \note{At client: } \bnote{Get Response}
+%       \\ \t
+%          \llet d ← σ 
+%          & \note{}
+      \\ \t
+%          \llet d' ← \max(d', d)
+         \ret \max(d, r)
+         & \note{Pointwise max of vector-clocks}
+%       \\ \t
+%          \ret d'
+      \\
+      & \\
+%          \PutReqPayload ≔ \Set[C × T × K]
+%          \PutReqPayload ≔ T × \Set[C × T × K]
+         \PutReqPayload ≔ C ↦ T
+         & \note{Put payload types}
+      \\
+         \putReq \ (\_, \_) (\self, d) ≔ 
+         & \note{At client: }\bnote{Put Request}
+         % (C, \CState)(K, V) → (\CState × \PutReqPayload)
+%       \\ \t
+%          \llet 〈t, d〉 ← σ 
+%       \\ \t
+%          \llet t ← σ[\self]
+%          & \note{Put timestamp is advanced.}
+         \\ \t         
+%          \llet σ' ← σ [ \self ↦ t' ]
+%          \llet σ' ← σ [ \self ↦ t + 1 ]
+         \llet d' ← d [ \self ↦ d(\self) + 1 ]
+         & \note{Session dependencies advanced.}
+%       \\ \t
+%          \llet d'' ← d
+      \\ \t
+%          \ret〈σ', t〉
+         \ret〈d, d'〉
+         & \note{Session vector-clock is sent as request payload.}
+      \\
+         \putGuard \ (\_, \_) (d) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+         % (R, \RState) (K, V, \PutReqPayload) → \Bool
+      \\ \t
+%          \llet〈\_, \_, \_, d'〉← ς [k]
+         \llet〈\_, r〉← ς
+      & \\ \t
+%          \ret ¬ (\vc(c) + 1 < \vc'(c))
+%          \ret \vc(c) + 1 > \vc'(c)
+%          \ret d(c) ≥ r(c)
+         \ret r ≥ d \, ∧ \, r(c) = d(c)
+%             \ret ¬ (\vc[c ↦ \vc(c) + 1] ≤ \vc'(c)) 
+%          ----
+%          \ret \vc'(c) < \vc(c)
+%        For later: above was the condition. 
+         & \note{Store satisfies the dependencies. The new put advances the store.}
+      \\
+         \lput \ (k, v) (d) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+        % (R, \RState) (K, V, \PutReqPayload) → \RState
+      \\ \t
+%          \llet〈s, r〉← ς
+         \llet〈s, r〉← ς
+      & \\ \t
+%          \llet r' ← \max (d[c ↦ d(c) + 1], r)
+         \llet r' ← r[c ↦ d(c) + 1]
+         & \note{Received advanced}
+%          \llet \vc'' ← \max (\vc, \vc')
+%          & \note{Dependencies are advanced}         
+%          For later, deps separately tracked.
+%       \\ \t
+%          \llet t ← \vc(c) + 1
+%          & \note{Current put timestamp.}
+%          For later, to store t         
+      \\ \t    
+         s' ← s [ k ↦ v ]
+%          s' ← s [k ↦ 〈c, t, v〉]
+%          For later, to store c and t         
+      & \\ \t
+         \ret 〈s', r'〉
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+      \caption{Causal Consistency Implementation 1
+      (Inspired by \cite{AhamadNeiger95}).}
+   \label{fig:causal-map-95}
+\end{figure}
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar} 
+   \begin{array}{|lr|}
+      \hline
+            \multicolumn{2}{|l|}{𝐈_{\CC_2}  \ (\name{Causal Consistency Implementation 2})}
+      \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         T × \List [C × T]
+         & \note{Put timestamp, and Session dependencies}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         〈0, ∅〉
+         & \note{Timestamp zero. No initial dependencies.}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         〈K ↦ C × T × V, \
+         & \note{Store ($C × T$ uniquely identifies puts.)}
+      \\ \t \phantom{〈}
+          C ↦ T〉          
+%          〈K ↦ V , \ C ↦ T〉
+         & \note{Received vector-clock}
+      \\
+         \rInit (r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         〈[\overline{ k ↦ 〈c₀, 0, v₀〉}], [\overline{ c ↦ 0 }]〉
+%          & \note{For each key, initial $v₀$ and empty initial dependencies}
+         & \note{Nothing initially received}
+      \\
+      & \\
+         \GetReqPayload ≔ \List [C × T]
+         & \note{Get payload types}
+      \\
+%          \GetResPayload ≔ C ↦ T
+         \GetResPayload ≔ C × T
+      & \\
+         \getReq \ (\_) (\_, σ)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \llet 〈\_, d〉← σ
+      & \\ \t
+%          \llet σ' ← σ 
+%          & \note{}
+%       & \\ \t
+%          〈σ', d〉
+%          〈σ, d〉
+         \ret〈d, σ〉
+         & \note{Session dependencies sent as request payload}
+%          Dependencies vector clock sent as request payload}
+      \\
+         \getGuard \ (\_) (d) (\_, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, r〉← ς
+      & \\ \t \ret \lforall (λ (c, t). \
+            r(c) ≥ t)
+            \ d
+            & \note{Store satisfies the dependencies}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈s, \_〉← ς
+      & \\ \t
+         \llet〈c, t, v〉← ς (k)
+%       & \\ \t
+%          \llet r' = r [ c ↦ t ]
+      & \\ \t
+         \ret〈 v, 〈c, t〉, ς 〉
+         & \note{}
+      \\
+         \getRes \ (\_, \_) (〈c, t〉) (\_, σ) ≔
+%          (C, \CState)(K, V, \GetResPayload) → \Unit
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \llet 〈t', d〉 ← σ 
+         & \note{}
+      \\ \t
+         \llet d' ← d :: 〈c, t〉
+         & \note{}
+      \\ \t
+         \ret〈 t', d' 〉
+         & \note{}
+      \\
+      & \\
+         \PutReqPayload ≔ \List [C × T]
+         & \note{Put payload types}
+      \\
+         \putReq \ (\_, \_) (c, σ) ≔
+         & \note{At client: }\bnote{Put Request}
+         \\ \t
+         \llet〈t, d〉← σ 
+         & \note{}
+      \\ \t
+         \llet t' ← t + 1
+         & \note{}
+      \\ \t
+         \llet d' ← [〈c, t'〉]
+         & \note{} 
+      \\ \t
+         \ret〈 d, 〈t', d'〉 〉
+         & \note{Session dependencies sent as request payload.}
+      \\
+         \putGuard \ (\_, \_) (d) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \llet〈\_, r〉← ς
+         & 
+      \\ \t \ret \lforall (λ (c, t). \
+         r(c) ≥ t)
+         \ d
+         & \note{Store satisfies the dependencies}
+      \\ \t \phantom{\ret}
+         \llookup (c, d, 0) = r(c)
+         & \note{The new put advances the store} 
+%       \\ \t \ret \llookup (c, d, 0) ≤ r(c)
+%          & \note{The new put advances the store}
+      \\
+         \lput \ (k, v) (\_) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \llet〈s, r〉← ς
+         & \note{}
+      \\ \t
+         \llet t ← r(c) + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \llet r' ← r [ c ↦ t ]
+         & \note{}
+      \\ \t    
+         s' ← s [k ↦ 〈c, t, v〉]
+      & \\ \t
+         \ret 〈s', r'〉
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+      \caption{Causal Consistency Implementation 2
+      (Inspired by \cite{LloydFreedman13_2}).}
+   \label{fig:LloydFreedman-protocol}
+\end{figure}

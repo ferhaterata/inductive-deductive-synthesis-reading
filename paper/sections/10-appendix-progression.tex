@@ -1,0 +1,216 @@
+\section{Synthesis Progression: \texttt{all\_less\_than}}
+\label{app:progression}
+
+% [addressed: each step compiles in Rocq 9.1; intermediate stubs use Parameter (compilable) instead of literal `todo` (not Coq); rejected else-branch attempt verified to actually fail] \ak{we should run the synthesis for this spec and use its output, this is using the manual output stages}
+
+This appendix walks through one full progression of \sys{}' deductive-synthesis loop on a small target. Step~0 and the Final State are complete \coq{} files that compile; the listings for intermediate Steps~1--5 show only the parts that change from the previous step, with not-yet-filled bodies stubbed as \texttt{Parameter}. The progression on real distributed-system specs follows the same pattern at much larger scale (\cref{sec:eval-synthesis}); the small target keeps each listing short enough to read end-to-end.
+
+The five synthesis steps below are an instance of the deductive-synthesis schema of \cref{app:worker}. Step 1 is a \emph{Decompose} (split the goal into a \texttt{nil} and a \texttt{cons} helper lemma). Step 2 combines \emph{Define} (fill the \texttt{nil} body) with \emph{Prove} (close the \texttt{nil} helper). Step 3 is another \emph{Decompose} (split the \texttt{cons} helper on the head). Step 4 is \emph{Define} (the recursive call). Step 5 combines \emph{Define} (fill the \texttt{else} branch) with \emph{Prove} (close the \texttt{else} helper). The file type-checks at every step (Invariant I1); \texttt{Admitted} placeholders carry the deferred holes forward and are all discharged by the Final state.
+
+The target is \texttt{all\_less\_than : list nat -> nat -> bool}, returning \texttt{true} iff every element of the input list is strictly less than the bound \texttt{n}. The correctness statement is the iff-equivalence with \texttt{Forall}:
+\begin{quote}
+  \texttt{all\_less\_than l n = true} $\Leftrightarrow$ \texttt{Forall (fun x => x < n) l}.
+\end{quote}
+
+\subsection{Step 0: bare specification}
+The implementation is a \texttt{Parameter}; the correctness lemma is \texttt{Admitted}. The file type-checks but proves nothing.
+
+\begin{lstlisting}[label={lst:state0}, caption={Step 0: spec only.}]
+Require Import Coq.Lists.List.
+
+Parameter all_less_than : list nat -> nat -> bool.
+
+Lemma all_less_than_correct : forall (l : list nat) (n : nat),
+  all_less_than l n = true <-> Forall (fun x => x < n) l.
+Proof.
+Admitted.
+\end{lstlisting}
+
+\subsection{Step 1: case-split on the input list}
+The agent commits to recursing on \texttt{l}. The implementation becomes a \texttt{Definition} with a \texttt{match} on \texttt{nil}/\texttt{cons}; the branch bodies are stubbed as \texttt{Parameter}s. The correctness lemma is split into a \texttt{\_nil} helper and a \texttt{\_cons} helper, both \texttt{Admitted}; the main lemma now closes by \texttt{induction} on \texttt{l}, applying each helper at its leaf.
+
+\begin{lstlisting}
+Parameter nil_body : bool.
+Parameter cons_body : nat -> list nat -> bool.
+
+Definition all_less_than (l : list nat) (n : nat) : bool :=
+  match l with
+  | nil => nil_body
+  | x :: xs => cons_body x xs
+  end.
+
+Lemma all_less_than_correct_nil : forall (n : nat),
+  all_less_than nil n = true <-> Forall (fun x => x < n) nil.
+Proof. Admitted.
+
+Lemma all_less_than_correct_cons :
+  forall (x : nat) (xs : list nat) (n : nat),
+  all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs).
+Proof. Admitted.
+
+Lemma all_less_than_correct : forall (l : list nat) (n : nat),
+  all_less_than l n = true <-> Forall (fun x => x < n) l.
+Proof.
+  intros l n. induction l as [| x xs IH].
+  - apply all_less_than_correct_nil.
+  - apply all_less_than_correct_cons.
+Qed.
+\end{lstlisting}
+
+\subsection{Step 2: fill the \texttt{nil} branch and close the \texttt{nil} helper}
+The agent fills \texttt{nil\_body} with \texttt{true} (replacing the \texttt{Parameter}) and proves \texttt{\_nil}: both sides of the iff are vacuously satisfied (\texttt{true = true}; \texttt{Forall \_ nil} holds by the empty constructor). The \texttt{cons} body is still a \texttt{Parameter}.
+
+\begin{lstlisting}
+Definition all_less_than (l : list nat) (n : nat) : bool :=
+  match l with
+  | nil => true
+  | x :: xs => cons_body x xs
+  end.
+
+Lemma all_less_than_correct_nil : forall (n : nat),
+  all_less_than nil n = true <-> Forall (fun x => x < n) nil.
+Proof. intros. simpl. split; intros; constructor. Qed.
+\end{lstlisting}
+
+\subsection{Step 3: introduce the \texttt{if} branch and split the \texttt{cons} helper}
+The agent commits to comparing \texttt{x} against \texttt{n} via \texttt{x <? n}, leaving both branches as \texttt{Parameter} stubs. The \texttt{\_cons} helper is split into a \texttt{\_then} sub-helper (under \texttt{x < n}) and an \texttt{\_else} sub-helper (under \texttt{$\neg$(x < n)}), and \texttt{\_cons} now proves itself by case-splitting on \texttt{Nat.ltb\_spec} and applying the appropriate sub-helper.
+
+\begin{lstlisting}
+Parameter then_body else_body : nat -> list nat -> nat -> bool.
+
+Definition all_less_than (l : list nat) (n : nat) : bool :=
+  match l with
+  | nil => true
+  | x :: xs => if x <? n then then_body x xs n else else_body x xs n
+  end.
+
+Lemma all_less_than_correct_cons_then :
+  forall (x : nat) (xs : list nat) (n : nat),
+  x < n -> (all_less_than xs n = true <-> Forall (fun x => x < n) xs) ->
+  (all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs)).
+Proof. Admitted.
+
+Lemma all_less_than_correct_cons_else :
+  forall (x : nat) (xs : list nat) (n : nat),
+  ~ (x < n) -> (all_less_than xs n = true <-> Forall (fun x => x < n) xs) ->
+  (all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs)).
+Proof. Admitted.
+
+Lemma all_less_than_correct_cons :
+  forall (x : nat) (xs : list nat) (n : nat),
+  all_less_than xs n = true <-> Forall (fun x => x < n) xs ->
+  all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs).
+Proof.
+  intros. destruct (Nat.ltb_spec x n) as [Hlt | Hge].
+  - apply all_less_than_correct_cons_then; assumption.
+  - apply all_less_than_correct_cons_else; [apply Nat.le_ngt; assumption | assumption].
+Qed.
+\end{lstlisting}
+
+\subsection{Step 4: fill the \texttt{then} branch with the recursive call}
+The agent fills \texttt{then\_body} with \texttt{all\_less\_than xs n}: the implementation now actually recurses, so \texttt{Definition} is promoted to \texttt{Fixpoint}. The \texttt{\_then} helper proves cleanly: under \texttt{x < n}, applying \texttt{Nat.ltb\_lt} rewrites the \texttt{if}-condition to \texttt{true}, and \texttt{Forall} on \texttt{x :: xs} reduces to \texttt{x < n} on the head plus \texttt{Forall} on \texttt{xs}, both available.
+
+\begin{lstlisting}
+Fixpoint all_less_than (l : list nat) (n : nat) : bool :=
+  match l with
+  | nil => true
+  | x :: xs => if x <? n then all_less_than xs n else else_body x xs n
+  end.
+
+Lemma all_less_than_correct_cons_then :
+  forall (x : nat) (xs : list nat) (n : nat),
+  x < n -> (all_less_than xs n = true <-> Forall (fun x => x < n) xs) ->
+  (all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs)).
+Proof.
+  intros x xs n Hlt H_ind. simpl.
+  apply Nat.ltb_lt in Hlt. rewrite Hlt.
+  split; intros.
+  - constructor; [apply Nat.ltb_lt; assumption | tauto].
+  - inversion H. tauto.
+Qed.
+\end{lstlisting}
+
+\subsection{Step 5: fill the \texttt{else} branch and close the \texttt{else} helper}
+The agent's first attempt is to recurse: \texttt{else\_body := all\_less\_than xs n} (``skip the out-of-bound element, keep checking''). The implementation type-checks, but the \texttt{\_else} obligation does not: under $\neg(x < n)$ the goal becomes \texttt{all\_less\_than xs n = true} $\Leftrightarrow$ \texttt{Forall (fun y => y < n) (x :: xs)}, which fails on \texttt{xs = nil}, \texttt{x = 5}, \texttt{n = 3} (LHS is \texttt{true}; RHS demands \texttt{5 < 3}). \coq{} rejects the proof. The agent backtracks and replaces the \texttt{else} body with \texttt{false}: the function now returns false on any out-of-bound element, the \texttt{\_else} helper closes (LHS becomes \texttt{false = true}, closed by \texttt{discriminate}; RHS gives \texttt{x < n} from inversion of \texttt{Forall}, contradicting $\neg(x < n)$).
+
+\begin{lstlisting}
+(* Attempt 1: else_body := all_less_than xs n  (rejected: iff fails) *)
+(* Attempt 2: else_body := false               (accepted)            *)
+
+Lemma all_less_than_correct_cons_else :
+  forall (x : nat) (xs : list nat) (n : nat),
+  ~ (x < n) -> (all_less_than xs n = true <-> Forall (fun x => x < n) xs) ->
+  (all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs)).
+Proof.
+  intros x xs n Hge _. simpl.
+  apply Nat.le_ngt in Hge. apply Nat.ltb_ge in Hge. rewrite Hge.
+  split.
+  - discriminate.
+  - intros HF. inversion HF; subst.
+    apply Nat.ltb_lt in H1. congruence.
+Qed.
+\end{lstlisting}
+
+\subsection{Final state}
+
+After five steps every \texttt{Parameter} stub and \texttt{Admitted} placeholder is closed. \coq{}'s kernel accepts the file, verifying \texttt{all\_less\_than\_correct} on every input.
+
+\begin{lstlisting}[label={lst:state5}, caption={Step 5 (final): implementation and proof, fully verified.}]
+Require Import Coq.Lists.List.
+Require Import Coq.Arith.PeanoNat.
+
+Fixpoint all_less_than (l : list nat) (n : nat) : bool :=
+  match l with
+  | nil => true
+  | x :: xs => if x <? n then all_less_than xs n else false
+  end.
+
+Lemma all_less_than_correct_nil : forall (n : nat),
+  all_less_than nil n = true <-> Forall (fun x => x < n) nil.
+Proof. intros. simpl. split; intros; constructor. Qed.
+
+Lemma all_less_than_correct_cons_then :
+  forall (x : nat) (xs : list nat) (n : nat),
+  x < n -> (all_less_than xs n = true <-> Forall (fun x => x < n) xs) ->
+  (all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs)).
+Proof.
+  intros x xs n Hlt H_ind. simpl.
+  apply Nat.ltb_lt in Hlt. rewrite Hlt.
+  split; intros.
+  - constructor; [apply Nat.ltb_lt; assumption | tauto].
+  - inversion H. tauto.
+Qed.
+
+Lemma all_less_than_correct_cons_else :
+  forall (x : nat) (xs : list nat) (n : nat),
+  ~ (x < n) -> (all_less_than xs n = true <-> Forall (fun x => x < n) xs) ->
+  (all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs)).
+Proof.
+  intros x xs n Hge _. simpl.
+  apply Nat.le_ngt in Hge. apply Nat.ltb_ge in Hge. rewrite Hge.
+  split.
+  - discriminate.
+  - intros HF. inversion HF; subst.
+    apply Nat.ltb_lt in H1. congruence.
+Qed.
+
+Lemma all_less_than_correct_cons :
+  forall (x : nat) (xs : list nat) (n : nat),
+  all_less_than xs n = true <-> Forall (fun x => x < n) xs ->
+  all_less_than (x :: xs) n = true <-> Forall (fun x => x < n) (x :: xs).
+Proof.
+  intros. destruct (Nat.ltb_spec x n) as [Hlt | Hge].
+  - apply all_less_than_correct_cons_then; assumption.
+  - apply all_less_than_correct_cons_else; [apply Nat.le_ngt; assumption | assumption].
+Qed.
+
+Lemma all_less_than_correct : forall (l : list nat) (n : nat),
+  all_less_than l n = true <-> Forall (fun x => x < n) l.
+Proof.
+  intros l n. induction l as [| x xs IH].
+  - apply all_less_than_correct_nil.
+  - apply all_less_than_correct_cons. assumption.
+Qed.
+\end{lstlisting}
+
+The progression on real distributed-system specs follows the same pattern at much larger scale: dozens of helper lemmas, hundreds of lines of implementation, and tactics that range over inductive simulation arguments rather than single-step rewrites. \cref{sec:design} describes how \sys{} drives this process; the case-study trajectory in \cref{sec:eval} shows it on the causal-consistency specification.

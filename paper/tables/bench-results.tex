@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.05}
+\caption{Pass counts on verification benchmarks. Bold $=$ best per column. The first four are proof-only (impl and spec given); on these, \sys{} reduces to its DSA component since the ISA has no design space to search. The last three are concurrent code-and-proof tasks. Per-benchmark slices, prior-SOTA references, and CloverBench note in \cref{app:benchmarks}.}
+\label{tab:bench-results}
+\begin{tabular}{lccccccc}
+\toprule
+Method & DafnyBench & miniCodeProps & Verus-Bench & CoqStoq & VERINA & AlgoVeri & CloverBench \\
+\midrule
+Prior SOTA            & 52 / 100 & 49 / 100  & 137 / 150 & 28 / 100 & 38 / 189  & 31 / 77 & -- \\
+Codex                 & 78 / 100 & 80 / 100  & 148 / 150 & 46 / 100 & 136 / 189 & 51 / 77 & 62 / 62 \\
+Claude Code           & 76 / 100 & 86 / 100  & 148 / 150 & 51 / 100 & 149 / 189 & 56 / 77 & 62 / 62 \\
+\midrule
+\textbf{\sys{}} (ours) & \textbf{88 / 100} & \textbf{100 / 100} & 149 / 150 & \textbf{97 / 100} & \textbf{176 / 189} & \textbf{65 / 77} & 62 / 62 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,13 @@
+\section{Limitations, Broader Impacts, and Ethics}
+\label{app:limitations-impacts}
+
+The main paper presents \sys{}' design and evaluation; this appendix addresses the limitations of the work, the broader impacts of verified-synthesis tooling, and ethical considerations.
+
+\paragraph{Limitations.}
+\sys{} requires a formal \coq{} \texttt{Module Type} as input; we do not synthesize specifications from natural language. Compute cost is $2$--$11$ hours and \$52--\$155 per closed spec, substantially below the months-to-years of expert proof effort it replaces but still meaningful. We evaluate on distributed key-value-store consistency; generality to other verified-synthesis domains (compilers, OS kernels, cryptographic protocols) is conjectured, not measured.
+
+\paragraph{Broader impacts.}
+Distributed systems are common in production software (databases, message queues, cloud services), but formal verification of these systems has remained out of reach for most production code because hand-written proofs take person-years of expert effort. \sys{} reduces that effort to hours of compute, putting verified distributed software within reach of production teams. Kernel-checked proofs make \sys{}' outputs safer than unverified LLM-generated code: the verifier rules out silent bugs against the specification. As with all formal verification, mis-specification remains a residual risk.
+
+\paragraph{Ethics.}
+The work involves no human subjects and no scraped data; the verified outputs introduce no dual-use risks beyond those already present in unverified LLM code generation.

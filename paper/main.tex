@@ -1,0 +1,264 @@
+% IDS Paper — arXiv preprint (NeurIPS 2026 base style, [preprint] option)
+\documentclass{article}
+
+% arXiv preprint: de-anonymized, no "Under review" banner, no line numbers.
+% Swap to default (no option) for double-blind submission, or [main, final] for camera-ready.
+\usepackage[preprint]{neurips_2026}
+% \usepackage{neurips_2026}
+% \usepackage[main, final]{neurips_2026}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks=true,
+            allcolors=blue!55!black]{hyperref}
+\renewcommand{\sectionautorefname}{\S}
+\renewcommand{\subsectionautorefname}{\S}
+\renewcommand{\subsubsectionautorefname}{\S}
+
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb}
+\usepackage{multirow}
+\usepackage{pifont}
+\providecommand{\cmark}{\ding{51}}
+\providecommand{\xmark}{\ding{55}}
+\usepackage{cleveref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{wrapfig}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\usepackage{listings}
+
+% Coq listing setup
+\lstdefinelanguage{Coq}{
+  morekeywords={Module, Type, End, Definition, Fixpoint, Parameter, Axiom,
+                Theorem, Lemma, Proof, Qed, Admitted, forall, fun, match,
+                with, if, then, else, let, in, return, true, false, nil,
+                Some, None, intros, unfold, simpl, reflexivity, induction,
+                apply, rewrite, destruct, split, constructor, inversion,
+                assumption, tauto, Require, Import, Inductive, Fixpoint},
+  sensitive=true,
+  morecomment=[s]{(*}{*)},
+  morestring=[b]",
+}
+\lstset{
+  language=Coq,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!50!black},
+  showstringspaces=false,
+  columns=fullflexible,
+  breaklines=true,
+  frame=single,
+  framesep=4pt,
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+}
+
+% \providecommand{\aknew}[1]{{\color{red}{#1}}}
+\providecommand{\aknew}[1]{#1}
+
+% Comment system
+\definecolor{cldarkgreen}{rgb}{0.0, 0.6, 0.2}  % darker than default green
+\newif\ifcomments
+\commentsfalse
+\ifcomments
+    \providecommand{\shubham}[1]{{\color{blue}{/* shubham: #1 */}}}
+    \providecommand{\mert}[1]{{\color{olive}{/* mert: #1 */}}}
+    \providecommand{\shu}[1]{{\color{magenta}{/* shu: #1 */}}}
+    \providecommand{\ion}[1]{{\color{cyan}{/* ion: #1 */}}}
+    \providecommand{\ak}[1]{{\color{orange}{/* alex: #1 */}}}
+    \providecommand{\mz}[1]{{\color{purple}{/* mz: #1 */}}}
+    \providecommand{\mohsen}[1]{{\color{orange}{/* mohsen: #1 */}}}
+    \providecommand{\accheng}[1]{{\color{red}{/* accheng: #1 */}}}
+    \providecommand{\cl}[1]{{\textcolor{cldarkgreen}{/* cl: #1 */}}}
+    % \providecommand{\aknew}[1]{{\color{red}{#1}}}
+\else
+    \providecommand{\shubham}[1]{}
+    \providecommand{\mert}[1]{}
+    \providecommand{\shu}[1]{} 
+    \providecommand{\ion}[1]{}
+    \providecommand{\ak}[1]{}
+    \providecommand{\mohsen}[1]{}
+    \providecommand{\accheng}[1]{}
+    \providecommand{\cl}[1]{}
+    % \providecommand{\aknew}[1]{#1}
+\fi
+
+% Custom macros
+% \newcommand{\sys}{VibeProof\xspace}
+% \newcommand{\sys}{CertGen\xspace}
+% \newcommand{\sys}{CerSyn\xspace}
+% \newcommand{\sys}{AC\'{E}S\xspace}
+\newcommand{\sys}{IDS\xspace}
+\newcommand{\sysname}{\sys}
+\usepackage{tipa}
+\newcommand{\syspronounce}{\textipa{["eIs\textepsilon z]}\xspace}
+\newcommand{\coq}{Rocq\xspace}
+\newcommand{\TODO}[1]{{\color{red}\textbf{TODO:} #1}}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\etal}{\emph{et~al.}\xspace}
+
+
+\usepackage{xcolor}
+\definecolor{softred}{HTML}{CC0000}
+\definecolor{softgreen}{HTML}{2AAA2A}
+\definecolor{softyellow}{HTML}{B8860B}
+\newcommand{\red}[1]{\textcolor{softred}{#1}}
+\newcommand{\green}[1]{\textcolor{softgreen}{#1}}
+\newcommand{\yellow}[1]{\textcolor{softyellow}{#1}}
+
+% Figure-reference numbered badge -- inline blue circle matching Fig 3 numbering
+\definecolor{fignumcolor}{HTML}{3B78D9}
+\DeclareRobustCommand{\fignum}[1]{\tikz[baseline=(c.base)]{\node[circle, fill=fignumcolor, text=white, inner sep=0.4pt, minimum size=8pt, font=\sffamily\bfseries\tiny] (c) {#1};}}
+
+% Standardize section references to use \S
+\crefformat{section}{\S#2#1#3}
+\crefformat{subsection}{\S#2#1#3}
+\crefformat{subsubsection}{\S#2#1#3}
+\Crefformat{section}{\S#2#1#3}
+\Crefformat{subsection}{\S#2#1#3}
+\Crefformat{subsubsection}{\S#2#1#3}
+\crefrangeformat{section}{\S#3#1#4--\S#5#2#6}
+\crefrangeformat{subsection}{\S#3#1#4--\S#5#2#6}
+\crefmultiformat{section}{\S\S#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefmultiformat{subsection}{\S\S#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+
+% Appendix reference formats (must be declared in preamble so body
+% references like \cref{app:foo} render correctly; the matching
+% \crefalias is set after \appendix below so labels typed as appendix.)
+\crefformat{appendix}{App.~#2#1#3}
+\Crefformat{appendix}{App.~#2#1#3}
+\crefrangeformat{appendix}{App.~#3#1#4--#5#2#6}
+\crefmultiformat{appendix}{App.~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefformat{subappendix}{App.~#2#1#3}
+\Crefformat{subappendix}{App.~#2#1#3}
+\crefformat{subsubappendix}{App.~#2#1#3}
+\Crefformat{subsubappendix}{App.~#2#1#3}
+
+% Figure/table reference formats: capitalize for professional appearance
+% (cleveref's default is lowercase "fig."/"table" -- override to "Fig."/"Table")
+\crefformat{figure}{Fig.~#2#1#3}
+\Crefformat{figure}{Fig.~#2#1#3}
+\crefrangeformat{figure}{Figs.~#3#1#4--#5#2#6}
+\crefmultiformat{figure}{Figs.~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefformat{table}{Table~#2#1#3}
+\Crefformat{table}{Table~#2#1#3}
+\crefrangeformat{table}{Tables~#3#1#4--#5#2#6}
+\crefmultiformat{table}{Tables~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+
+
+\newcommand{\cut}[1]{\unskip}
+% \newcommand{\cut}[1]{#1}
+
+
+
+% -------------------------------------
+% imports for specs
+\input{specs/predefs}
+\input{specs/Unicode}
+% -------------------------------------
+
+% \title{Verification as Search: Discovering Correct and Efficient Distributed Algorithms with LLM Agents}
+% \title{No Bug Left Behind: LLM Agents for \\Formally Verified Distributed Systems Synthesis}
+% \title{No Bug Left Behind: Agentic Certified Synthesis of Distributed Systems}
+
+% \title{Agentic Certified Synthesis of Distributed Systems}
+% \title{Agentic Certified Synthesis}
+% \title{Inductive Deductive Synthesis for Complex Systems}
+% \title{Agentic Inductive Deductive Synthesis}
+% \title{Inductive Deductive Synthesis}
+\title{Inductive Deductive Synthesis: Enabling AI to Generate Formally Verified Systems}
+% Shorter titles are better. Also this suggest that it is a general technique rather than an agent for a particular system.
+
+% De-anonymized author block (arXiv preprint).
+% \mdseries overrides the \bf wrapper that neurips_2026.sty sets on the first row.
+% $^{*,1}$ on the first four authors marks equal contribution.
+\author{%
+  \mdseries
+  Shubham Agarwal$^{*,1}$, Alexander Krentsel$^{*,1}$, Shu Liu$^{*,1}$, Mert Cemri$^{*,1}$,\\ Audrey Cheng$^{1}$,
+  Rui Meng$^{2}$, Tomas Pfister$^{2}$, Chun-Liang Li$^{2}$, Sylvia Ratnasamy$^{1}$, \\Aditya Parameswaran$^{1}$,
+  Matei Zaharia$^{1}$, Ion Stoica$^{1}$, Mohsen Lesani$^{3}$ \\[0.3em]
+  $^{1}$UC Berkeley \quad $^{2}$Google \quad $^{3}$UC Santa Cruz
+}
+
+% ============================================================
+% Anonymized author block (swap back in for double-blind submission).
+% ============================================================
+% \author{%
+%   Author~One \\
+%   Institution \\
+%   \texttt{author1@institution.edu} \\
+%   \And
+%   Author~Two \\
+%   Institution \\
+%   \texttt{author2@institution.edu} \\
+%   \And
+%   Author~Three \\
+%   Institution \\
+%   \texttt{author3@institution.edu} \\
+% }
+
+\begin{document}
+
+
+\maketitle
+
+% Equal-contribution footnote (asterisk on first four authors). Rendered
+% on the title page via \footnotetext with a locally-overridden marker
+% so it does not consume the arabic footnote counter used elsewhere.
+{\renewcommand{\thefootnote}{$\ast$}\footnotetext{Equal contribution.}}
+
+% \begin{center}
+% \vspace{-2.5em}
+% \emph{``Code that's not proven is just vibes.''}
+% \end{center}
+% \vspace{0.25em}
+
+\input{sections/00-abstract}
+\input{sections/01-intro-restructure}
+\input{sections/07-related}
+\input{sections/02-background}
+\input{sections/03-design}
+\input{sections/05-evaluation-new}
+\input{sections/08-conclusion}
+
+{\small
+\bibliographystyle{plain}
+\bibliography{references,refs}
+}
+
+\clearpage
+\appendix
+% Type all labels defined in the appendix as `appendix' so cref renders
+% them via the App.~ format declared in the preamble. Cleveref also
+% auto-derives `subappendix' and `subsubappendix' from sectioning depth.
+\crefalias{section}{appendix}
+\input{sections/09-appendix-consistency}   % A. Specifications and \syst{} suite
+\input{sections/14-appendix-synth-results} % D. Synthesis results detail
+\input{sections/14b-appendix-llm-only-synthesis} % D2. LLM-only synthesis (pass@K=100 NL)
+\input{sections/11-appendix-performance}   % E. Performance details
+\input{sections/12-appendix-benchmarks}    % F. Cross-language + concurrent benchmark details
+\input{sections/13-appendix-architecture}  % B. Architecture details
+\input{sections/10-appendix-progression}   % C. Worked example: all_less_than
+\input{sections/16-appendix-limitations-impacts}   % G. Limitations and broader impacts
+\input{sections/17-appendix-specs}                 % H. \sys{} suite specifications (math form, last)
+\newpage
+% \input{checklist}  % temporarily commented to save scroll effort on Overleaf; uncomment for submission (mandatory per NeurIPS — desk-reject if missing)
+
+
+
+\end{document}

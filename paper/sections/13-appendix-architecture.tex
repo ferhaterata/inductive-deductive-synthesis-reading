@@ -1,0 +1,146 @@
+\section{\sys{} Architecture Details}
+\label{app:architecture}
+
+This appendix expands on the components introduced in \cref{sec:design} and ablated in \cref{sec:eval-ablations}. The architecture instantiates the two-level CEGIS-style refinement of \cref{sec:design}. The inner loop is the DSA (\cref{app:worker}): forward moves \emph{Define}, \emph{Prove}, \emph{Decompose} extend the partial (code, proof) candidate, and the structured \coq{} diagnostic from a failed step (\cref{app:feedback}) is a concrete witness that the candidate cannot close as written, used by the agent to choose \emph{Repair} or \emph{Revert}. The outer loop is the ISA: a DSA's stalled proof attempts and bench failures (\cref{app:bench-signal}) drive the proposer (\cref{app:guide}) on tactical stalls and the reloader (\cref{app:resetter}) on strategic dead-ends. The audit step (\cref{app:auditor}) is orthogonal to refinement: it is a deterministic safety gate, not a counterexample signal.
+
+\providecolor{specbg}{HTML}{F7F8FA}
+\providecolor{specrule}{HTML}{C8CDD3}
+\providecommand{\promptbox}[1]{%
+  {\setlength{\fboxsep}{6pt}\setlength{\fboxrule}{0.3pt}%
+   \noindent\fcolorbox{specrule}{specbg}{\begin{minipage}{0.96\linewidth}\small #1\end{minipage}}}%
+}
+
+\subsection{Proof methodology}
+\label{app:proof-method}
+
+Each spec is a \coq{} \texttt{Module Type} carrying a \texttt{State} type, an \texttt{Update} type, seven method signatures (\texttt{getReq}, \texttt{getGuard}, \texttt{get}, \texttt{getRes}, \texttt{putReq}, \texttt{putGuard}, \texttt{put}), and an operational semantics on client--replica configurations. The implementation \sys{} produces is an \texttt{AlgDef} module providing the same seven methods at concrete state types, plus a \texttt{Refinement} module proving forward simulation: every step the implementation can take corresponds to a step the abstract spec can take, on related states. From the \texttt{Refinement} we obtain a \texttt{TraceInclusion} theorem: every observable trace of the implementation is also a trace of the abstract spec.
+
+The tactic vocabulary is standard \coq{}: \texttt{inversion}, \texttt{destruct}, \texttt{subst}, \texttt{rewrite}, \texttt{apply}, \texttt{econstructor; eauto}, \texttt{simpl}, \texttt{lia}, \texttt{congruence}, with case-analysis on \texttt{Nat.eq\_dec} for equality decisions on identifiers and timestamps. No \texttt{firstorder}/\texttt{intuition} shortcuts; no \texttt{Admitted}, no \texttt{Axiom}, no \texttt{Hypothesis}, no \texttt{Parameter}. Closure is verified by \coq{}'s kernel.
+
+\subsection{DSA: deductive synthesis}
+\label{app:worker}
+
+The DSA is a Codex (or Claude Code) session per workspace performing the deductive-synthesis loop of \cref{sec:design-worker}. At each search-tree node the agent moves forward with one of three primitives:
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
+\item \emph{Define}: declare or extend a state/message type or function body, with \texttt{admit} placeholders for parts not yet filled in (e.g.\ adding a \texttt{Cell} record to the per-key store with \texttt{cell\_deps} stubbed).
+\item \emph{Prove}: close an open proof obligation by replacing \texttt{Admitted} with a tactic sequence ending in \texttt{Qed}, or extend an existing tactic block.
+\item \emph{Decompose}: state a helper lemma as \texttt{Admitted} and use it to advance the proof of an existing lemma; the helper is discharged in a later iteration.
+\end{itemize}
+
+After each forward step \texttt{make} runs and \coq{}'s type-checker is the only oracle. On error, the agent backtracks with one of two primitives:
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
+\item \emph{Repair}: re-attempt the failed step with a different tactic (e.g.\ \texttt{induction} instead of \texttt{destruct}; \texttt{lia} instead of \texttt{omega}).
+\item \emph{Revert}: rewind to an earlier search-tree node and choose a different forward primitive (typically when the same compile error recurs three or more times).
+\end{itemize}
+
+The agent's initial brief is read from \texttt{CLAUDE.md} in the workspace and instantiates the four briefings of \cref{sec:design-worker} (methodology, auditability, design, tactical playbook). The brief shown below is for the \coq{} setting (our \sys{} suite specs and Chapar CC, plus CoqStoq and miniCodeProps); for cross-language benchmarks we swap the verifier and surface tools to match the target language: Dafny (DafnyBench, AlgoVeri-Dafny, CloverBench), Verus (Verus-Bench), and Lean~4 (VERINA), with success criterion adapted accordingly (e.g.\ \texttt{dafny verify} accepts, \texttt{lake build} succeeds, \texttt{verus} reports zero errors).
+
+\promptbox{%
+\textbf{Role: Deductive Synthesis Agent.} Given a specification, incrementally produce an implementation and a machine-checked proof that it satisfies the specification. The type-checker is the only oracle and accepts a partial state (with deferred holes) as a valid intermediate.
+
+\textbf{Schema.} Synthesis is a finite sequence of well-typed steps; the file must type-check (possibly with deferred holes) after every step. Take one forward move:
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt,topsep=1pt]
+\item \emph{Define} (refinement): introduce or extend a \texttt{Definition}, \texttt{Record}, \texttt{Inductive}, \texttt{Fixpoint}, or \texttt{Module}; bodies may contain \texttt{admit} or invoke \texttt{Admitted} lemmas.
+\item \emph{Prove} (closure): replace an \texttt{Admitted} lemma with a tactic sequence ending in \texttt{Qed}, or extend an existing partial proof.
+\item \emph{Decompose} (lemma introduction): state a helper lemma as \texttt{Admitted}, use it to advance the current proof, and discharge it later. This is the deferred-hole device of deductive synthesis.
+\end{itemize}
+On error, backtrack: \emph{Repair} (different tactic on the same goal, e.g.\ \texttt{induction} instead of \texttt{destruct}, \texttt{lia} instead of \texttt{omega}) or \emph{Revert} (rewind to an earlier state and try a different forward move; trigger when the same error recurs three or more times).
+
+\textbf{Invariants.} (I1)~The file type-checks after every step. (I2)~Every \texttt{Admitted} is a deferred hole, not a permanent assumption: all \texttt{Admitted} must be closed before reporting \emph{done}. (I3)~The specification is fixed. (I4)~No \texttt{Axiom}, \texttt{Hypothesis}, \texttt{Parameter}, or unguarded recursion.
+
+\textbf{Design.} State types should be concrete (records, bounded lists, indexed nats), not function types whose \texttt{override} builds closure chains under repeated update. State must not grow unboundedly with the number of operations: traces, logs, and accumulated dependency lists belong in the proof context, not the runtime state.
+
+\textbf{Termination.} Report \emph{done} when (a)~the file type-checks with zero \texttt{Admitted} and zero \texttt{admit}, and (b)~the audit step passes (no vacuous proofs; no specification edits; non-trivial method bodies). The coordinator additionally extracts the implementation and runs the benchmark harness; if extraction or execution fails, the run reverts.
+
+\textbf{Tactical playbook.}
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt,topsep=1pt]
+\item Build simple to complex: prove small structural facts first, then combine.
+\item When stuck on a subgoal, read it carefully; the goal often names the missing helper.
+\item Use \texttt{admit} (lowercase) to skip subgoals temporarily; the final file must have zero \texttt{Admitted} and zero \texttt{admit}.
+\end{itemize}
+}
+
+\cref{app:progression} walks through an end-to-end illustration of this schema on a small target (\texttt{all\_less\_than}): each of the five synthesis steps is annotated with its move (\emph{Define}, \emph{Prove}, \emph{Decompose}), with every intermediate listing type-checking under the kernel.
+
+\subsection{Audit step}
+\label{app:auditor}
+
+The audit step is a deterministic Python script that gates closure with kernel-level verdicts (no model outputs). It encapsulates the cheating patterns we have observed during runs.
+
+\textbf{Static checks.}
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
+\item \texttt{Admitted} count is zero.
+\item After stripping comments, \texttt{Axiom}, \texttt{Hypothesis}, and \texttt{Parameter} counts are zero.
+\item \texttt{make clean \&\& make} exits zero.
+\end{itemize}
+
+\textbf{Vacuous-proof patterns.} The script also matches the closed file against four patterns:
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
+\item A \texttt{put} that returns a fixed constant the spec accepts on every input.
+\item An always-true \texttt{getGuard} that admits any read.
+\item A forward-simulation theorem stated over an empty domain so that it holds vacuously.
+\item A state-only stub whose \texttt{Update} drops the payload and returns the initial state on every operation.
+\end{itemize}
+
+A candidate that fails any check is sent to the ISA; only candidates passing all checks count as audit-clean closures.
+
+\subsection{Proposer (ISA tactical role)}
+\label{app:guide}
+
+After the coordinator counts no progress across $10$ consecutive polls, the proposer fires as a one-shot LLM session. It receives the work file, every \texttt{Admitted} lemma's surrounding $17$-line context, and the most recent \texttt{make} error with $4$ lines of trailing context when present, and writes its output to \texttt{GUIDANCE.md} in the workspace.
+
+\promptbox{%
+\textbf{Role.} You are an expert \coq{} proof advisor. Read the work file and focus on the proof goals and error context below. Do NOT edit the \texttt{.v} file.
+
+\textbf{For each Admitted proof, follow this checklist:}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt,topsep=1pt]
+\item \textbf{Read the lemma statement.} What does it claim? What are the hypotheses? What is the conclusion type?
+\item \textbf{Identify the proof structure needed:}
+\texttt{forall x, P x} $\to$ \texttt{intros x};
+inductive type (list, trace, nat) $\to$ \texttt{induction} on it;
+step/transition $\to$ \texttt{destruct} on the step type, then case analysis;
+simulation $\to$ invariant + induction on trace length;
+two functions equal $\to$ \texttt{functional\_extensionality}.
+\item \textbf{Identify missing helper lemmas.} For each subgoal you cannot close directly, state the EXACT helper (name, signature, informal meaning). Suggest: prove it separately; \texttt{Admit} it in the main proof; close it.
+\item \textbf{If the proof is $>30$ lines, decompose:} by cases (\texttt{X\_case\_C1}, \texttt{X\_case\_C2}, \dots\ for each constructor); by subgoal (if $A \wedge B$, prove $A$ and $B$ separately); extract common patterns repeating $3$+ times.
+\item \textbf{Suggest specific tactic sequences,} not vague directions.
+\end{enumerate}
+
+\textbf{For compile errors,} diagnose using a decision tree (e.g., \emph{``Cannot unify X with Y''} $\to$ type mismatch, use \texttt{Check expr.}; \emph{``Tactic failure''} $\to$ try \texttt{lia} instead of \texttt{omega}; \emph{``No matching clauses''} $\to$ incomplete pattern match).
+
+\textbf{Output.} Write \texttt{GUIDANCE.md} with one section per Admitted proof or error: (a) the diagnosis, (b) the exact tactic sequence to try, (c) any helper-lemma signatures.
+}
+
+On Chapar, the proposer chose three sub-lemma classes (per-message, per-store-entry, per-replica-clock) by recognising that the global delivery invariant decomposes cleanly along these axes, none of which \coq{}'s automation closes alone.
+
+\subsection{Reloader (ISA strategic role)}
+\label{app:resetter}
+
+The reloader escalates every $20$ polling cycles when no progress is detected: Level $1$ at stall cycle $20$, Level $2$ at $40$, Level $3$ at $60$, and so on. Each level is a one-shot LLM session reading \texttt{DESIGN\_LOG.md}, \texttt{STATUS.md}, and every prior level's output, and writes \texttt{META\_GUIDANCE\_L\{N\}.md}. The strategist consumes the output to rewrite its plan and spawn a fresh worker on the new design.
+
+\promptbox{%
+\textbf{Role.} You are a level-$N$ formal verification architect. Read \texttt{DESIGN\_LOG.md}, \texttt{STATUS.md}, and every prior \texttt{META\_GUIDANCE\_L\{1..N{-}1\}.md}: the history of all approaches tried and why each failed.
+
+\textbf{Synthesize a NEW approach that avoids ALL recorded failures.} Think across these dimensions:
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt,topsep=1pt]
+\item \textbf{Data representation.} Concrete types for state and messages: records, bounded lists, nats, not functions.
+\item \textbf{Abstraction function.} How concrete state maps to abstract state. This is the KEY creative choice; if previous attempts failed on the simulation proof, the abstraction was wrong.
+\item \textbf{Invariant.} What property holds at every reachable state. The invariant must be (a)~true initially, (b)~preserved by every step, (c)~strong enough to prove the final theorem.
+\item \textbf{Proof decomposition.} Which helper lemmas are needed, stated explicitly with signatures.
+\item \textbf{Minimum information.} For each function that takes a collection, could the caller pass a smaller collection and still get a correct result? The most precise design passes only what is needed per call.
+\end{enumerate}
+
+\textbf{Output.} Write \texttt{META\_GUIDANCE\_L\{N\}.md} as a CONCRETE blueprint a worker can directly implement: exact \texttt{Record} types, method signatures, abstraction function, invariant, and lemma decomposition. Do NOT write vague advice; do NOT spawn workers.
+}
+
+On Chapar, the reloader chose a per-key store entry recording sender, sender clock, and dependency vector; alternative layouts (e.g.\ a single global per-replica state) leave the delivery lemma unprovable from local information.
+
+\subsection{\coq{} feedback}
+\label{app:feedback}
+
+Each \texttt{make} invocation captures stdout/stderr; on non-zero exit, the coordinator extracts every \texttt{Error:} line plus $2$ lines of preceding context and $4$ lines of trailing context as a single error block. The block is included verbatim in the worker's next prompt alongside the proof goal, the local hypothesis context, and the tactic backtrace where applicable. No normalisation or summarisation is applied: the structured \coq{} diagnostic carries the localisation signal. Replacing this stream with a binary accept/reject collapses the search (\cref{sec:eval-ablations} reports $\le 1/3$ closure on every \coq{} spec under $-$VF).
+
+\subsection{Performance feedback}
+\label{app:bench-signal}
+
+When a worker reaches a verifier-clean state with a design hash distinct from prior runs, the coordinator invokes the benchmark harness asynchronously. The harness extracts the implementation to OCaml, deploys it on the cluster (\cref{app:perf-harness}), and writes results to \texttt{PERF\_RESULTS.md} in the workspace. Throughput targets are calibrated per-spec from the published reference; implementations whose throughput falls below the target are flagged and trigger the reloader on the next escalation.

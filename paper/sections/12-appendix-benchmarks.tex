@@ -1,0 +1,35 @@
+% \newpage
+\section{Results on Proof, Annotation, and Code-and-Proof Benchmarks}
+\label{app:benchmarks}
+
+\sys{} beats every prior method on the four proof and annotation benchmarks, and reaches $\mathbf{176/189}$ on VERINA against prior SOTA $38$ and agentic baselines Codex $136$, Claude Code $149$ (\cref{tab:bench-results}).
+
+\input{tables/bench-modalities}
+\input{tables/bench-results}
+
+\subsection{Proof and annotation benchmarks}
+
+\paragraph{Setup.}
+The model receives a complete task specification (signature, preconditions, postconditions, and code where applicable) and must produce verifier-acceptable output: proof annotations on DafnyBench~\cite{dafnybench} and Verus-Bench~\cite{autoverus}, or a complete proof on miniCodeProps~\cite{minicodeprops} and CoqStoq~\cite{rango} (modality in \cref{tab:bench-modalities}). For each benchmark we use the slice the prior SOTA method published its number on:
+\begin{itemize}
+\item \textbf{DafnyBench}: $100$ hardest tasks; prior SOTA is DafnyPro~\cite{dafnypro} (from the DafnyBench paper).
+\item \textbf{miniCodeProps}: $100$ tasks from the sorting split; prior SOTA is COPRA~\cite{copra}.
+\item \textbf{Verus-Bench}: full $150$ tasks; prior SOTA is AutoVerus~\cite{autoverus}.
+\item \textbf{CoqStoq}: $100$ hardest tasks; prior SOTA is Rango~\cite{rango}.
+\end{itemize}
+
+\paragraph{Result.}
+\sys{} reaches $88/100$ on DafnyBench, $100/100$ on miniCodeProps, $149/150$ on Verus-Bench, and $97/100$ on CoqStoq (\cref{tab:bench-results}), beating the strongest prior on all four. The largest absolute gap is on CoqStoq ($+69$ over Rango); \sys{} hits a perfect $100/100$ on miniCodeProps, and on Verus-Bench all three LLM methods are within $1\%$ of saturation (\sys{} $149$, Codex $148$, Claude Code $148$ of $150$). Failures reflect per-task budget caps and proofs requiring tactics or library-specific lemmas the agent did not discover within budget (\cref{app:proof-method}).
+
+\subsection{Code-and-proof benchmarks}
+
+\paragraph{Setup.}
+A second, recent line of benchmarks evaluates joint code-and-proof synthesis on single-function algorithmic tasks (sorting, search, list manipulation, basic arithmetic like factorial/gcd/Fibonacci): the model receives a natural-language description, signature, and spec, and produces both the code and a proof of correctness. These tasks are strictly simpler than the distributed-system specs of \cref{sec:eval-synthesis}: no concurrency, no replication, no multi-step operational semantics.
+\begin{itemize}
+\item \textbf{VERINA}~\cite{verina}: $189$ Lean tasks; prior SOTA is iterative refinement with Lean compiler feedback ($64$ rounds), reported in the VERINA paper.
+\item \textbf{AlgoVeri}~\cite{algoveri}: $77$ problems, each expressed in Dafny, Verus, and Lean; prior SOTA $31/77$ (Gemini-3 Flash, Dafny track, reported in the AlgoVeri paper).
+\item \textbf{CloverBench}~\cite{clover}: $62$ Dafny tasks. We omit a Prior-SOTA cell because Clover (the only prior published method) evaluates a different task: its consistency-checker filters pre-existing correct triples (an $87\%$ acceptance rate, with $13\%$ false negatives where it rejects a known-correct triple). Our column reports end-to-end synthesis: given the spec, the model generates code and annotations, and the Dafny verifier accepts.
+\end{itemize}
+
+\paragraph{Result.}
+\sys{} reaches $\mathbf{176/189}$ on VERINA, well above prior SOTA $38$ and agentic baselines Codex $136$, Claude Code $149$; $\mathbf{65/77}$ on AlgoVeri's Dafny track, $2\times$ the published Gemini-3 Flash baseline of $31/77$; and all three LLM methods saturate at $62/62$ on CloverBench.

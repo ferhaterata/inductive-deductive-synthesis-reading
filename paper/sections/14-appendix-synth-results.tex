@@ -1,0 +1,25 @@
+\section{Synthesis Results: Per-Spec Artifacts}
+\label{app:synth-results}
+
+All seven artifacts pass \coq{}'s kernel with no \texttt{Admitted}, \texttt{Axiom}, \texttt{Hypothesis}, or \texttt{Parameter}. The three CC specs (Chapar CC: $3{,}037$ lines / $79$ lemmas; \sys{} suite CC: $3{,}807$ / $121$; LCC: $3{,}924$ / $128$) are $4$--$6\times$ larger than the four session specs because their proofs span all replicas, not just sender and receiver.
+
+\input{tables/synth-artifacts}
+
+\paragraph{Implementation rationale.}
+
+\textbf{Chapar CC.} The $79$ lemmas split: $11$ per-method refinement (one per \texttt{get}/\texttt{put}/\texttt{update}/\texttt{guard}/\texttt{init}), $11$ reachable-state invariants, $7$ causality preservation, $39$ clock and per-key store algebra, and $11$ execution-model helpers.
+
+\textbf{Session guarantees (RYW, MW, MR, RYW+MW).} All four share the same assoc-list skeleton; each parameterizes the per-entry payload to its consistency property: RYW carries (val, client, ts) to detect own writes, MW extends to (val, client$\to$ts) to enforce writer order, MR uses one entry per (key, client) updated in place, RYW+MW combines both. The proof technique is shared too: each session uses heavy case-analysis via \texttt{Nat.eq\_dec} on key and client equality ($80$--$100$ splits per spec), varying only in which payload field the splits land on. Each Get scans only the distinct keys touched, not the full Put history. MR is the hardest session spec because its Put proof splits into four sub-cases (same vs different key, same vs different client), each closed by case-analysis on \texttt{Nat.eq\_dec}.
+
+\textbf{\sys{} suite CC.} A vector clock, a per-key vector-clock map, and a balanced-tree store; the balanced tree keeps Get logarithmic in distinct keys rather than linear in prior Puts. Of the $121$ lemmas: $8$ are the step-by-step simulation, $32$ are refinement-relation invariants for the state components (cell, replica, snapshot) and their preservation under updates, $19$ are vector-clock algebra; the remaining $62$ are update, lookup, owner, and dependency-tracking algebra. Get's proof closes by applying the relation that ties the implementation's vector clocks plus per-client owner lists (per-key tracking of which client most recently wrote each entry) to the spec's dependency sets.
+
+\textbf{LCC.} A vector clock, a per-key vector-clock map, and a balanced-tree store, with dependency entries tagged with a label (a $4$-tuple of client, timestamp, key, label) and projections at Get filtered by the requesting client's interest mask. The proof closes by step-by-step simulation; the simulation relation ties the implementation's label-tagged vector-clock representation to the spec's label-filtered dependency sets. Of the $128$ lemmas: $6$ are the step-by-step simulation, $25$ are refinement-relation invariants and extensions for state components (cells, replicas, snapshots, key-snapshots), $19$ are vector-clock algebra; the remaining $78$ are update, lookup, owner, and dependency-tracking algebra.
+
+\paragraph{Synthesis trajectories.}
+The artifacts above are not the first design \sys{} attempted. In each case, the proof stalled on a goal that resisted splitting under the spec's natural state representation; the ISA's reloader abandoned the branch, and the proposer pivoted to a representation under which the goal decomposed.
+
+\textbf{Chapar CC.} The hardest case in any causal-consistency proof shows that whenever a replica delivers a remote message, it has already observed every update the message transitively depends on. \sys{}' first attempt kept the global state representation closest to the spec, under which the delivery lemma had to range over every in-flight message at every replica together, and the DSA could not split it. After the search stalled, the reloader abandoned that branch and the proposer revised the design to a per-key store with per-entry sender, sender-clock, and dependency vector. The proposer then split the delivery invariant into three sub-lemma classes (per-message, per-store-entry, per-replica-clock), each closing under the new representation. The representation was chosen by what split the proof, not by performance; the per-put performance win reported in \cref{sec:eval-perf} is a consequence.
+
+\textbf{Monotonic reads.} Both agent baselines, and \sys{}' first attempt, stalled on the function-from-key-to-value representation. After the reloader abandoned that branch, the agent revised the design to a flat list of per-(key, client) entries updated in place, after which the put proof split into four sub-cases on key and client equality.
+
+\textbf{\sys{} suite CC and LCC.} The winning move is to break the simulation goal into per-message and per-store-entry sub-lemmas, each closing against the per-key store and label-tagged dependency entries respectively. The baselines try the combined goal in one shot and time out within the budget.

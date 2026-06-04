@@ -1,0 +1,45 @@
+\section{Implementing Distributed-KV Specifications with Coding Agents \\(No Proof)}
+\label{app:llm-only-synthesis}
+
+\paragraph{Setup.}
+We test Codex (\texttt{gpt-5.4}) on four KV-store consistency properties (RYW, MW, MR, and CC). For each property, Codex generates 100 candidate implementations under two prompt conditions, then picks its single best candidate. That selected implementation is the agent's output for that (property, condition).
+
+\emph{Setting (1) Spec-Given.} Codex receives the formal \coq{} specification and the module-type signature.
+
+\emph{Setting (2) NL-Only (``vibe coding'').} Codex receives only a one-paragraph natural-language description of the property (reproduced verbatim below) and the module-type signature.
+
+Each of the 100 generation sessions runs independently and can compile, edit, and test its own code. The selector pass is also Codex, with the same compile and test access. The selected implementation must use bounded state, cannot copy any reference implementation, and cannot use \texttt{Admitted}, \texttt{Axiom}, \texttt{Hypothesis}, or \texttt{Parameter} (so the agent cannot stub out unfilled work). The agent does not write any refinement proof.
+
+We evaluate the selected implementation in two stages.
+\emph{Stage~1 (test).} We run the implementation on an adversarial multi-client scenario; if it accepts an operation the abstract specification rejects on this scenario, Stage~1 fails.
+\emph{Stage~2 (proof).} If Stage~1 passes, \sys{} attempts the refinement proof against the abstract specification. If \sys{} cannot close the proof within budget, Stage~2 fails.
+We split into two stages because proof attempts are much more expensive than scenario testing. If Stage~1 fails, Stage~2 fails too: an implementation that breaks the spec on a single trace cannot be proven correct on every trace.
+
+\paragraph{Property statements (LLM-visible in Setting~2).}
+\begin{description}
+\item[RYW (Read-Your-Writes).] Each client must observe its own previous writes. If a client writes a value to a key and later reads that key in the same session, the read must return the client's value or a more recent one.
+\item[MW (Monotonic Writes).] Writes by the same client are applied at every replica in the order the client issued them.
+\item[MR (Monotonic Reads).] Successive reads by the same client observe non-decreasing replica states: once a client has seen a value, later reads must not appear older.
+\item[CC (Causal Consistency).] If operation $A$ causally precedes operation $B$ (either $A$ comes before $B$ in the same client's session, or $B$ reads a value written by $A$), every client that sees $B$ must also have seen $A$.
+\end{description}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{l|ccc|ccc}
+\toprule
+ & \multicolumn{3}{c|}{Setting (1) Spec-Given} & \multicolumn{3}{c}{Setting (2) NL-Only} \\
+Spec & Stage~1 pass & Stage~2 pass & Cost & Stage~1 pass & Stage~2 pass & Cost \\
+\midrule
+RYW & 1 & 1 & \$30.50 & 1 & 0 & \$25.77 \\
+MW  & 1 & 0 & \$32.10 & 1 & 0 & \$27.33 \\
+MR  & 0 & 0 & \$35.20 & 0 & 0 & \$29.91 \\
+CC  & 0 & 0 & \$47.80 & 0 & 0 & \$40.79 \\
+\bottomrule
+\end{tabular}
+\caption{Outcome of best-of-$N{=}100$ implementation-only synthesis with Codex. \textbf{1} = passed, \textbf{0} = failed. Stage~1: the selected implementation runs through a fixed adversarial multi-client scenario without violating the abstract specification on that scenario. Stage~2: \sys{} builds a refinement proof of the implementation against the abstract specification within budget. Cost is the \texttt{gpt-5.4} token cost for the 100 generations plus the selection pass.}
+\label{tab:llm-only-synthesis}
+\end{table}
+
+\paragraph{Result and takeaway.}
+Best-of-$N=100$ produces a verified implementation on 1 of 4 properties when given the formal specification (Setting~1, RYW), and on 0 of 4 from natural language alone (Setting~2). The two simpler session properties (RYW and MW) consistently pass the scenario test in both settings, but only RYW with the formal spec also passes the refinement proof. The harder properties (MR and CC) fail even the scenario test in both settings: the textbook patterns Codex selects (vector-clock dominance, last-write-wins) do not implement the per-key or causal-order behavior these specs demand. Two failure modes appear: (a) implementations that fail on a single adversarial trace, and (b) implementations that pass the trace but cannot be proven correct on every reachable state. \sys{} avoids both by integrating the refinement proof into synthesis rather than running it as a post-hoc check; in the main evaluation it closes the proof on all 7 specifications.

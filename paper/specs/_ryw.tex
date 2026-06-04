@@ -1,0 +1,258 @@
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\RYW} ⃰  \ (\name{Read Your Writes Specification}) 
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+%          \Set[C × T × K]
+%          & \note{Session puts. ($C × T$ uniquely identifies puts.)}
+         \Set[K × T]
+         & \note{Session puts. ($T$ uniquely identifies puts in a client.)}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         ∅
+%          \lif (c = c₀) \
+%            \{ 〈c₀, 1〉\} \ 
+%          \lelse ∅
+         & \note{No initial puts}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+%          K ↦ (C × T × V × \Set[C × T × K])
+         K ↦ (V × C × T \, × 
+         & \note{Map from each key $k$ to its value $v$, its origin $〈c, t〉$,}
+      \\ \t \phantom{K ↦ (}
+%          \Set[C × T])
+         \Set[T])
+         & \note{and timestamps of puts on $k$ before it.}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, c₀, 0, ∅〉}]
+%          [\overline{ k ↦ 〈v₀, c₀, 1, ∅〉}]
+         & \note{}
+      \\
+      & \\
+%          \GetReqPayload ≔ \Set[C × T × K]
+%          \GetReqPayload ≔ \Set[C × T]
+         \GetReqPayload ≔ \Set[T]
+         & \note{Get payload types}
+      \\
+         \GetResPayload ≔ \Unit
+      & \\
+         \getReq \ (k) (\_, p)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈p|ₖ, p〉
+         & \note{Session past puts as request payload, State unchanged}
+      \\
+         \getGuard \ (k)(p)(c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, c', t', p'〉← ς (k)
+      & \\ \t
+%          \ret c = c' ⇒ ¬ (p'|ₖ ∪ \{〈c', t'〉\} ⊂ p|ₖ )
+%          \ret c' = c ⇒ ¬ (p' ∪ \{〈c', t'〉\} ⊂ p )
+%          \ret c = c' ⇒ p = p' ∪ \{〈c', t'〉\}
+%          \ret c = c' ⇒ p ⊆ p' ∪ \{〈c', t'〉\}
+         \ret c = c' ⇒ p ⊆ p' ∪ \{ t'\}
+%          \ret p|ₖ ⊆ (p'|ₖ ∪ \{〈c', t', k〉\})         
+         & \note{If stored value is from requesting client, his puts not missed.}
+%          
+%       & \\ \t
+%          \ret 
+%             \lforall (λ〈c ⃰, t ⃰, k ⃰〉. \
+%             & \note{If the session puts $d$}
+%       \\ \t\t \phantom{\ret \lforall (}
+%             k ⃰ = k  ⇒ 
+%             & \note{includes any put $〈c ⃰, t ⃰〉$,}
+%       \\ \t\t\t \phantom{\ret \lforall (}
+%             t ⃰ = 0 ∨〈c ⃰, t ⃰〉= 〈c', t'〉\ ∨
+%             & \note{then the current entry for $k$ is $〈c ⃰, t ⃰〉$, or}
+%       \\ \t\t\t \phantom{\ret \lforall (}
+%             〈c ⃰, t ⃰, k ⃰〉∈ p') \
+%             & \note{$〈c ⃰, t ⃰〉$ is in the past puts of the current entry.}
+%       \\ \t \phantom{\ret \lforall}
+%             p
+%          & \note{}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, \_, \_, \_〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret〈 v, ○, ς 〉
+         & \note{No payload}
+      \\
+         \getRes \ (\_, \_) (\_) (\_, p) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret p
+         & \note{State unchanged.}
+      \\
+      & \\
+%          \PutReqPayload ≔ T × \Set[C × T]
+         \PutReqPayload ≔ T × \Set[T]
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\self, p) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         \llet t ← |p| + 1
+         & \note{Current put timestamp}
+      \\ \t
+%          \llet p' ← p ∪ \{〈\self, t, k〉\}
+         \llet p' ← p ∪ \{〈t, k〉\}
+         & \note{The put is added to session puts.}
+      \\ \t
+%          \ret〈d|ₖ, d'〉
+         \ret〈〈t, p|ₖ〉, p'〉
+         & \note{Session puts are sent as request payload.}
+      \\
+         \putGuard \ (\_, \_) (\_) (\_, \_, \_) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \ret \true
+         & \note{}          
+      \\
+         \lput \ (k, v) (〈t, p〉) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, t, p〉]
+      & \\
+      & \\
+      p|ₖ ≔ \{ t \ | \ 〈t, k〉∈ p \}
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Read Your Writes Specification}
+   \label{fig:read-your-writes-spec}
+\end{figure}
+
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\RYW} \ (\name{Read Your Writes Implementation}) 
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         K ↦ T
+         & \note{Latest put for each key. ($T$ uniquely identifies puts in a client.)}
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         [ \overline{k ↦ 0} ]
+         & \note{No initial puts}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × C × T) 
+         & \note{Map from each key $k$ to its value $v$, and its origin $〈c, t〉$}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, c₀, 0〉}]
+         & \note{}
+      \\
+      & \\
+         \GetReqPayload ≔ T
+         & \note{Get payload types}
+      \\
+         \GetResPayload ≔ \Unit
+      & \\
+         \getReq \ (k) (\_, p)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈p(k), p〉
+         & \note{Timestamp of latest put as request payload, State unchanged}
+      \\
+         \getGuard \ (k)(t)(c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, c', t'〉← ς (k)
+      & \\ \t
+         \ret  c = c'  ⇒  t = t' 
+%          t ≤ t'
+         & \note{If stored value is from requesting client, his puts not missed.}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{At replica: } \bnote{Get}
+      \\ \t
+         \llet〈v, \_, \_〉← ς (k)
+         & \note{}
+      \\ \t
+         \ret〈 v, ○, ς 〉
+         & \note{No payload}
+      \\
+         \getRes \ (\_, \_) (\_) (\_, p) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret p
+         & \note{State unchanged.}
+      \\
+      & \\
+         \PutReqPayload ≔ T
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\self, p) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         \llet t ← p(k) + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \llet p' ← p [ k ↦ t ]
+         & \note{The put timestamp is stored as the latest for the key.}
+      \\ \t
+         \ret〈t, p'〉
+         & \note{Latest put timestamp sent as request payload.}
+      \\
+         \putGuard \ (\_, \_) (\_) (\_, \_, \_) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \ret \true
+         & \note{}          
+      \\
+         \lput \ (k, v) (t) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, t〉]
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Read Your Writes Implementation}
+   \label{fig:read-your-writes-impl}
+\end{figure}

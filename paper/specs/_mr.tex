@@ -1,0 +1,249 @@
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\MR} ⃰  \ (\name{Monotonic Reads Specification})
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         \Set[T × K] \, ×
+         & \note{Session puts. ($C × T$ uniquely identifies puts.)}
+      \\ \t 
+         \Set[C × T × K]
+         & \note{Session dependencies.}         
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         ∅
+         & \note{No initial dependencies}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × C × T \, ×
+         & \note{Map from each key $K$ to its value $V$, its origin $C × T$}
+      \\ \t \phantom{K ↦ (}
+%          \Set[C × T])
+         \Set[T  × K])
+         & \note{and puts before it}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, c₀, 0, ∅〉}]
+         & \note{}
+      \\
+      & \\
+%          \GetReqPayload ≔ \Set[C × T × K]
+%          \GetReqPayload, \GetResPayload ≔ \Set[C × T]
+%          \GetReqPayload, \GetResPayload ≔ \Set[C × T]
+         \GetReqPayload ≔ \Set[C × T]
+         & \note{Get payload types}
+      \\
+         \GetResPayload ≔ C × T
+         & \note{}
+      \\
+         \getReq \ (k) (\_, 〈p, d〉)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈d|ₖ, 〈p, d〉〉
+         & \note{Session deps for $k$ sent as payload, State unchanged}
+      \\
+         \getGuard \ (k) (d) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, c', t', d'〉← ς (k)
+      & \\ \t
+%          \ret d|_{c'} ⊆ d' ∪ \{〈c', t'〉\}
+         \ret d|_{c'} ⊆ d'|ₖ ∪ \{ t' \}
+%          & \note{Observed puts from $c'$ are not after stored put from $c'$.}
+         & \note{Stored put from $c'$ doesn't miss observed puts from $c'$.}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{}
+      \\ \t
+         \llet〈v, c, t, d〉← ς (k)
+      & \\ \t
+         \ret〈 v, 〈c, t〉, ς 〉
+         & \note{The stored put returned as a dependency.}
+      \\
+         \getRes \ (k, \_) (〈c, t〉) (\_, 〈p, d〉) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+%          \ret d ∪ (c ▹ d' ▹ k)
+         \ret 〈p, d ∪ \{ 〈c, t, k〉\}〉
+%          \ret d ∪ d'
+%          \ret d ∪ (c ▹ d')
+%          \ret d ∪ (\lmap (λ〈t, k〉. \ 〈c, t, k〉) \ d'
+         & \note{Returned dependency added to session dependencies.}
+      \\
+      & \\
+         \PutReqPayload ≔ T × \Set[T × K]
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\_, 〈p, d〉) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+%          \llet t ← |\{〈c, \_, \_〉∈ p \ | \ c=\self \}| + 1
+%          \llet t ← | \, d|_\self \, | + 1
+         \llet t ← | p | + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \llet p' ← p ∪ \{〈t, k〉\}
+         & \note{The put is added to session puts.}
+      \\ \t
+%          \ret〈〈t, d|ₖ|ₚ〉, d'〉
+%          \ret〈〈t, d|_{\self}|ₖ〉, d'〉
+         \ret〈〈t, p〉, 〈p', d〉〉
+         & \note{Session puts are sent as request payload.}
+      \\
+         \putGuard \ (\_, \_) (\_) (\_, \_, \_) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \ret \true
+         & \note{}          
+      \\
+         \lput \ (k, v) (〈t, p〉) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, t, p〉]
+      & \\
+      & \\
+      d|ₖ ≔ \{〈c, t〉 \ | \ 〈c, t, k〉∈ d \}
+      & \\
+      d|ₖ ≔ \{ t \ | \ 〈t, k〉∈ d \}
+%       & \\
+%       d|_c  ≔ \{〈t, k〉 \ | \ 〈c, t, k〉∈ d \}
+      & \\
+      d|_c  ≔ \{ t \ | \ 〈c, t〉∈ d \}
+%       & \\
+%       c ▹ d ≔ \lmap (λ〈t, k〉. \ 〈c, t, k〉) \ d
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Monotonic Reads Specification}
+   \label{fig:monotonic-reads-spec}
+\end{figure}
+
+\clearpage
+\begin{figure}
+   \figurealgtextsize
+   \setlength{\abovedisplayskip}{0pt}%
+   \setlength{\abovedisplayshortskip}{0pt}%
+   \setlength{\belowdisplayskip}{0pt}%
+   \setlength{\belowdisplayshortskip}{0pt}%
+   \begin{mathpar}
+   \begin{array}{|lr|}
+      \hline
+         𝐈_{\MR} \ (\name{Monotonic Reads Implementation})
+      & \\ \hline
+         T ≔ \Nat
+         & \note{Timestamp}
+      \\
+         \CState ≔ 
+         & \bnote{Client State}
+      \\ \t
+         T \ ×
+         & \note{Session latest put timestamp}
+      \\ \t
+         K ↦ C ↦ T
+         & \note{Largest timestamp read for the key from the client.}         
+      \\
+         \cInit(c) ≔
+         & \bnote{Client Initial State}
+      \\ \t
+         〈∅, ∅〉
+         & \note{No initial puts and dependencies}
+      \\
+         \RState ≔
+         & \bnote{Replica State}
+      \\ \t
+         K ↦ (V × C × T)
+         & \note{Map from each key $K$ to its value $V$, its origin $C × T$}
+%       \\ \t \phantom{K ↦ (}
+% %          \Set[C × T])
+%          K ↦ T)
+%          & \note{and puts before it}
+      \\
+         \rInit(r, v₀) ≔ 
+         & \bnote{Replica Initial State}
+      \\ \t
+         [\overline{ k ↦ 〈v₀, c₀, 0〉}]
+         & \note{}
+      \\
+      & \\
+         \GetReqPayload ≔ \Set[C × T]
+         & \note{Get payload types}
+      \\
+         \GetResPayload ≔ C × T
+         & \note{}
+      \\
+         \getReq \ (k) (\_, 〈t, d〉)  ≔ 
+         & \note{At client: } \bnote{Get Request}
+      \\ \t
+         \ret〈d(k), 〈t, d〉〉
+         & \note{Session deps for $k$ sent as payload, State unchanged}
+      \\
+         \getGuard \ (k) (d) (c, \_, ς) ≔
+         & \note{At replica: } \bnote{Get Guard}
+      \\ \t
+         \llet〈\_, c', t'〉← ς (k)
+      & \\ \t
+         \ret d(c') ≤  t'
+         & \note{Stored put from $c'$ doesn't miss observed puts from $c'$.}
+      \\
+         \get \ (k) (\_) (\_, \_, ς)  ≔
+         & \note{}
+      \\ \t
+         \llet〈v, c, t〉← ς (k)
+      & \\ \t
+         \ret〈 v, 〈c, t〉, ς 〉
+         & \note{The stored put returned as a dependency.}
+      \\
+         \getRes \ (k, \_) (〈c, t〉) (\_, 〈t, d〉) ≔
+         & \note{At client: } \bnote{Get Response}
+      \\ \t
+         \ret〈t, d[〈k,c〉 ↦ t] 〉
+         & \note{Returned dependency advances session dependencies.}
+      \\
+      & \\
+         \PutReqPayload ≔ T
+         & \note{Put payload types}
+      \\
+         \putReq \ (k, \_) (\_, 〈t, d〉) ≔ 
+         & \note{At client: }\bnote{Put Request}
+      \\ \t
+         \llet t' ← t + 1
+         & \note{Current put timestamp}
+      \\ \t
+         \ret〈t', 〈t', d〉〉
+         & \note{}
+      \\
+         \putGuard \ (\_, \_) (\_) (\_, \_, \_) ≔ 
+         & \note{At replica: } \bnote{Put Guard}
+      \\ \t
+         \ret \true
+         & \note{}          
+      \\
+         \lput \ (k, v) (t) (c, \_, ς) ≔ 
+         & \note{At replica: } \bnote{Put}
+      \\ \t
+         \ret ς [k ↦ 〈v, c, t〉]
+      & \\ \hline
+   \end{array}
+   \end{mathpar}
+   \caption{Monotonic Reads Implementation}
+   \label{fig:monotonic-reads-impl}
+\end{figure}

@@ -1,0 +1,102 @@
+\providecolor{specbg}{HTML}{F7F8FA}
+\providecolor{specrule}{HTML}{C8CDD3}
+\providecolor{speckwd}{HTML}{1F4E79}
+\providecolor{partialhi}{HTML}{FFF3CD}
+\providecolor{completehi}{HTML}{D4EDDA}
+
+\begin{figure}[tb]
+\centering
+\lstset{
+  language=Coq,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\bfseries\color{speckwd},
+  showstringspaces=false,
+  columns=fullflexible,
+  breaklines=true,
+  numbers=none,
+  frame=single,
+  framerule=0.3pt,
+  framesep=3pt,
+  rulecolor=\color{specrule},
+  xleftmargin=4pt,
+  xrightmargin=2pt,
+  backgroundcolor=\color{specbg},
+  aboveskip=0pt,
+  belowskip=0pt,
+}
+\begin{minipage}[t]{0.32\textwidth}
+\centering
+\textbf{Specification}\\[2pt]
+\begin{lstlisting}
+Module Type CounterSpec.
+
+  Parameter t    : Type.
+  Parameter init : t.
+  Parameter inc  : t -> t.
+  Parameter read : t -> nat.
+
+  Axiom read_init :
+    read init = 0.
+
+  Axiom read_inc :
+    forall s,
+    read (inc s) =
+      S (read s).
+
+End CounterSpec.
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}
+\centering
+\textbf{Partial impl.\ \& proof}\\[2pt]
+\begin{lstlisting}
+Definition t := list unit.
+Definition init : t := nil.
+\end{lstlisting}
+\begin{lstlisting}[backgroundcolor=\color{partialhi}]
+Definition inc (s : t) : t.
+Admitted.
+\end{lstlisting}
+\begin{lstlisting}
+Definition read (s : t) :=
+  length s.
+
+Theorem read_init :
+  read init = 0.
+Proof. reflexivity. Qed.
+Theorem read_inc :
+  forall s,
+  read (inc s) = S (read s).
+\end{lstlisting}
+\begin{lstlisting}[backgroundcolor=\color{partialhi}]
+Admitted.
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\textwidth}
+\centering
+\textbf{Complete impl.\ \& proof}\\[2pt]
+\begin{lstlisting}
+Definition t := list unit.
+Definition init : t := nil.
+\end{lstlisting}
+\begin{lstlisting}[backgroundcolor=\color{completehi}]
+Definition inc (s : t) :=  tt::s.
+\end{lstlisting}
+\begin{lstlisting}
+Definition read (s : t) :=
+  length s.
+Theorem read_init :
+  read init = 0.
+Proof. reflexivity. Qed.
+Theorem read_inc :
+  forall s,
+  read (inc s) = S (read s).
+\end{lstlisting}
+\begin{lstlisting}[backgroundcolor=\color{completehi}]
+Proof. intros s. unfold read, inc.
+  simpl. reflexivity. Qed.
+\end{lstlisting}
+\end{minipage}
+\caption{Counter \textit{specification} (left), \textit{partial} synthesis (center, yellow = \texttt{Admitted}), and \textit{complete} synthesis (right, green = filled in). \coq{} accepts both files.}
+\label{fig:counter-listing}
+\end{figure}

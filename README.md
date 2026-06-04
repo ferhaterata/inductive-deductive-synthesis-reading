@@ -24,6 +24,7 @@ published verified references.
 - [`slides/IDS-paper-summary.md`](slides/IDS-paper-summary.md) — condensed summary
 - [`slides/IDS-paper-full-summary.md`](slides/IDS-paper-full-summary.md) — full summary
 - [`slides/assets/`](slides/assets/) — figures used in the talk
+- [`paper/`](paper/) — the paper's LaTeX source (arXiv e-print, `main.tex` + sections/specs/tables/figures), included for reference only — copyright remains with the authors
 
 ## Viewing the talk
 

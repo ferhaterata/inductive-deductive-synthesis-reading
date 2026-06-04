@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{What each cross-language benchmark gives the model and what the model must produce. \cmark{} = given as input; \xmark{} = the model must generate it. ``Spec'' covers preconditions and postconditions (or the theorem statement, where applicable). For DafnyBench the implementation body is given; only Dafny verification \emph{hints} (loop invariants, assertions, decreases clauses) are stripped. miniCodeProps and CoqStoq give the spec as a Lean / Coq theorem statement.}
+\label{tab:bench-modalities}
+\providecommand{\cmark}{\ding{51}}
+\providecommand{\xmark}{\ding{55}}
+\begin{tabular}{lllccccl}
+\toprule
+\multirow{2}{*}{Benchmark} & \multirow{2}{*}{Language} & \multirow{2}{*}{Verifier} & \multicolumn{4}{c}{Given to model} & \multirow{2}{*}{Task} \\
+\cmidrule(lr){4-7}
+& & & NL desc. & Signature & Spec & Code & \\
+\midrule
+DafnyBench~\cite{dafnybench}    & Dafny       & Dafny     & \xmark & \cmark & \cmark & \cmark & annotations \\
+miniCodeProps~\cite{minicodeprops} & Lean 4   & Lean      & \xmark & \cmark & \cmark & \cmark & proof \\
+Verus-Bench~\cite{autoverus}    & Rust        & Verus     & \xmark & \cmark & \cmark & \cmark & annotations \\
+CoqStoq~\cite{rango}            & Coq         & Coq       & \xmark & \cmark & \cmark & \cmark & proof \\
+CloverBench~\cite{clover}       & Dafny       & Dafny     & \cmark & \cmark & \cmark & \xmark & code + annot. \\
+{VERINA}~\cite{verina}  & Lean 4 & Lean & \cmark & \cmark & \cmark & \xmark & \textbf{code + proof} \\
+\bottomrule
+\end{tabular}
+\end{table}
