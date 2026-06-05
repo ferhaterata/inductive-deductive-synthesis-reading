@@ -125,9 +125,9 @@
 
 ## Slide 10 — Cross-language generality  ·  ~1 min
 
-> "One more result, because it answers an obvious question: is this just a Rocq trick? No. The DSA is a **language-agnostic agent loop** — they instantiate it per language by swapping the verifier, the success criterion, and the tool surface, and evaluate each benchmark in its *native* tool: Lean for VERINA and miniCodeProps, Dafny for DafnyBench and CloverBench, Verus for Verus-Bench, Coq for CoqStoq. It was *not* one Rocq run.
+> "One more result, because it answers an obvious question: is this just a Rocq trick? No. The DSA is a **language-agnostic agent loop** — they instantiate it per language by editing the agent's brief, a `CLAUDE.md` file, to swap the verifier, the success criterion, and the tool surface, then evaluate each benchmark in its *native* tool: Lean for VERINA and miniCodeProps, Dafny for DafnyBench and CloverBench, Verus for Verus-Bench, Coq for CoqStoq. It was *not* one Rocq run.
 >
-> On the proof-only benchmarks — where the implementation and spec are already given — the system collapses to just the DSA prover, and it sets a new state of the art on all four. On the harder **code-and-proof** benchmarks, the blue rows, it reaches sixty-two of sixty-two on CloverBench and a hundred seventy-six of one-eighty-nine on VERINA — where the prior best was thirty-eight."
+> On the proof-only benchmarks — where the implementation and spec are already given — the system collapses to just the DSA prover, and it beats the prior state of the art on all four: DafnyBench 88 versus 52, miniCodeProps a perfect 100 versus 49, Verus-Bench 149 versus 137, CoqStoq 97 versus 28. On the harder **code-and-proof** benchmarks, the blue rows, it reaches sixty-two of sixty-two on CloverBench and a hundred seventy-six of one-eighty-nine on VERINA — where the prior best was just thirty-eight."
 
 **Cue:** advance on "the prior best was thirty-eight." *(Compressible — drop to the headline VERINA number if short.)*
 

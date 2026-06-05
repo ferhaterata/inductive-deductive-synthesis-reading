@@ -310,6 +310,7 @@
         <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Checks only the inputs you <strong>happen to try</strong></div></div>
         <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>A bug in any <em>untried</em> case slips through</div></div>
         <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Shows the <span class="warn">presence</span> of bugs, never their absence</div></div>
+        <div style="margin-top:0.7em; padding-left:0.9em; border-left:3px solid var(--accent2); font-style:italic; color:var(--dim); font-size:clamp(0.85rem,1.2vw,1.05rem);">&ldquo;Testing shows the presence, not the absence of bugs.&rdquo; &mdash; Dijkstra</div>
       </div>
       <div class="step info-box" style="border-top: 4px solid var(--green);">
         <div style="font-weight:900; color: var(--green); font-size: clamp(1.1rem,1.7vw,1.5rem);">Verification</div>
@@ -460,7 +461,7 @@
       <tr><th>Thread</th><th>Representative work</th><th>How IDS differs</th></tr>
       <tr>
         <td><strong>Specification generation</strong></td>
-        <td style="color: var(--dim);">nl2postcond, AutoSpec, Clover</td>
+        <td style="color: var(--dim);">nl2postcond, AutoSpec, <span style="color: var(--accent); font-weight:600;">Clover</span></td>
         <td>The task is <em>intent&rarr;spec</em> or <em>code&rarr;spec</em>.<br><span style="color: var(--accent); font-weight:600;">IDS</span> instead <strong>consumes</strong> a spec as input &mdash; it doesn't produce one</td>
       </tr>
       <tr>
@@ -475,7 +476,7 @@
       </tr>
       <tr>
         <td><strong>Verified synthesis</strong></td>
-        <td style="color: var(--dim);">Manna&ndash;Waldinger, Synquid, Sketch/CEGIS; VERINA, AlphaVerus; IronFleet, Verdi, FSCQ, Chapar, Iris</td>
+        <td style="color: var(--dim);">Manna&ndash;Waldinger, Synquid, Sketch/CEGIS; <span style="color: var(--accent); font-weight:600;">VERINA</span>, AlphaVerus; IronFleet, Verdi, FSCQ, Chapar, Iris</td>
         <td>Classical methods stay small; hand-built systems cost months&ndash;years.<br><span style="color: var(--accent); font-weight:600;">IDS</span>: verified synthesis <span class="ok">at systems scale, in hours</span></td>
       </tr>
     </table>
@@ -487,16 +488,16 @@
     <h2>One agent loop, <span class="highlight">six benchmarks</span>, four verifiers</h2>
     <style>#xlang td, #xlang th { padding-top: 0.5em; padding-bottom: 0.5em; line-height: 1.35; }</style>
     <table id="xlang" style="font-size: clamp(0.78rem, 1.25vw, 1.05rem);">
-      <tr><th>Benchmark</th><th>Language</th><th>Verifier</th><th>Task</th><th>IDS</th></tr>
-      <tr><td><strong>DafnyBench</strong></td><td>Dafny</td><td>Dafny</td><td>annotations <span style="color:var(--dim);font-size:0.9em;">(invariants/asserts stripped, body given)</span></td><td class="ok">88 / 100</td></tr>
-      <tr><td><strong>miniCodeProps</strong></td><td>Lean 4</td><td>Lean</td><td>proof</td><td class="ok">100 / 100</td></tr>
-      <tr><td><strong>Verus-Bench</strong></td><td>Rust</td><td>Verus</td><td>annotations</td><td class="ok">149 / 150</td></tr>
-      <tr><td><strong>CoqStoq</strong></td><td>Coq</td><td>Coq</td><td>proof</td><td class="ok">97 / 100</td></tr>
-      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>CloverBench</strong></td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">code + annotations</td><td style="color: var(--accent); font-weight:700;">62 / 62</td></tr>
-      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>VERINA</strong></td><td style="color: var(--accent);">Lean 4</td><td style="color: var(--accent);">Lean</td><td style="color: var(--accent);"><strong>code + proof</strong></td><td style="color: var(--accent); font-weight:700;">176 / 189</td></tr>
+      <tr><th>Benchmark</th><th>Language</th><th>Verifier</th><th>Task</th><th>Prior SOTA</th><th>IDS</th></tr>
+      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>DafnyBench</strong></td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">annotations <span style="font-size:0.9em;">(invariants/asserts stripped, body given)</span></td><td style="color: var(--accent);">52</td><td style="color: var(--accent); font-weight:700;">88 / 100</td></tr>
+      <tr><td><strong>miniCodeProps</strong></td><td>Lean 4</td><td>Lean</td><td>proof</td><td style="color:var(--dim);">49</td><td class="ok">100 / 100</td></tr>
+      <tr><td><strong>Verus-Bench</strong></td><td>Rust</td><td>Verus</td><td>annotations</td><td style="color:var(--dim);">137</td><td class="ok">149 / 150</td></tr>
+      <tr><td><strong>CoqStoq</strong></td><td>Coq</td><td>Coq</td><td>proof</td><td style="color:var(--dim);">28</td><td class="ok">97 / 100</td></tr>
+      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>CloverBench</strong></td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">code + annotations</td><td style="color: var(--accent);">&mdash;</td><td style="color: var(--accent); font-weight:700;">62 / 62</td></tr>
+      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>VERINA</strong></td><td style="color: var(--accent);">Lean 4</td><td style="color: var(--accent);">Lean</td><td style="color: var(--accent);"><strong>code + proof</strong></td><td style="color: var(--accent);">38</td><td style="color: var(--accent); font-weight:700;">176 / 189</td></tr>
     </table>
     <div class="callout" style="margin-top: 0.9em; font-size: clamp(0.88rem,1.35vw,1.15rem);">
-      <strong>Not one Rocq run.</strong> IDS is a <span class="highlight">language-agnostic agent loop</span> &mdash; they instantiate it per language (swap verifier + success criterion + tool surface) and evaluate each benchmark in its native tool. On the <em>proof-only</em> rows (impl &amp; spec given) the system collapses to just the <strong>DSA prover</strong>. Prior SOTA on VERINA was 38; IDS reaches <span class="ok">176</span>.
+      <strong>Not one Rocq run.</strong> IDS is a <span class="highlight">language-agnostic agent loop</span> &mdash; they instantiate it per language by editing the agent brief (<code style="display:inline;padding:0 0.2em;border:none;background:#eee;">CLAUDE.md</code>) to swap the verifier, success criterion, and tool surface, then evaluate each benchmark in its native tool. On the <em>proof-only</em> rows (impl &amp; spec given) the system collapses to just the <strong>DSA prover</strong>. Prior SOTA on VERINA was 38; IDS reaches <span class="ok">176</span>.
     </div>
   </div>
 
