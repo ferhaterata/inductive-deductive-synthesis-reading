@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inductive Deductive Synthesis — IDS</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
-  onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<!-- (KaTeX removed: no math on the slides, and it was misparsing dollar amounts like $148) -->
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
@@ -383,29 +380,7 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 5: WHY THE NAME (deductive vs inductive) ==================== -->
-  <div class="slide" id="s4c" data-section="The Name">
-    <h3>Why &ldquo;Inductive Deductive&rdquo;?</h3>
-    <h2>Two classic synthesis strategies, <span class="highlight">fused</span></h2>
-    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.2em; align-items: stretch;">
-      <div class="step info-box" style="border-top: 4px solid var(--accent);">
-        <div style="font-weight:900; color: var(--accent); font-size: clamp(1.1rem,1.7vw,1.5rem);">Deductive &mdash; reason <em>down</em> from rules</div>
-        <span style="font-size: clamp(0.95rem,1.4vw,1.2rem);">Start from the <strong>spec</strong> and inference rules; derive an impl + proof that <em>must</em> satisfy it. <span class="ok">Truth-preserving &mdash; guaranteed correct.</span><br>
-        <span class="warn">Weakness:</span> only as good as the strategy &mdash; a bad design just grinds to a halt.</span>
-      </div>
-      <div class="step info-box" style="border-top: 4px solid var(--accent2);">
-        <div style="font-weight:900; color: var(--accent2); font-size: clamp(1.1rem,1.7vw,1.5rem);">Inductive &mdash; generalize <em>up</em> from cases</div>
-        <span style="font-size: clamp(0.95rem,1.4vw,1.2rem);">Learn from <strong>failed attempts</strong> to hypothesize a better strategy. <span class="ok">This is how good designs get discovered.</span><br>
-        <span class="warn">Weakness:</span> generalization guarantees nothing on its own.</span>
-      </div>
-    </div>
-    <div class="step callout" style="margin-top: 1.2em; text-align: center; border-color: var(--green);">
-      <strong>Complementary:</strong> deduction guarantees correctness <em>under</em> a strategy; induction <em>discovers</em> better strategies from what failed.<br><span style="color: var(--accent); font-weight:700;">IDS puts both in one loop.</span>
-      <span style="display:block; color: var(--dim); font-size: 0.85em; margin-top: 0.4em;">(&ldquo;Inductive&rdquo; = generalize-from-failure &mdash; not the mathematical induction the proofs happen to use internally.)</span>
-    </div>
-  </div>
-
-  <!-- ==================== SLIDE 6: ARCHITECTURE ==================== -->
+  <!-- ==================== SLIDE 5: ARCHITECTURE ==================== -->
   <div class="slide" id="s5" data-section="System">
     <h3>The System</h3>
     <h2>IDS as a <span class="highlight">multi-agent</span> architecture</h2>
@@ -438,14 +413,14 @@
         <th>IDS<br><span style="font-weight:400; font-size:0.8em; color:var(--dim);">GPT-5.4</span></th>
         <th>IDS time / cost</th>
       </tr>
-      <tr><td>Chapar Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; \$148</td></tr>
-      <tr><td>Read-Your-Writes</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>2 h &middot; \$52</td></tr>
-      <tr><td>Monotonic Reads</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>7 h &middot; \$102</td></tr>
-      <tr><td>Monotonic Writes</td><td>2/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>3 h &middot; \$58</td></tr>
-      <tr><td>RYW + MW</td><td class="warn">0/3</td><td class="warn">1/3</td><td class="ok">3/3</td><td>5 h &middot; \$93</td></tr>
-      <tr><td>Suite Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td>2/3</td><td>11 h &middot; \$155</td></tr>
-      <tr><td>Labeled Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; \$136</td></tr>
-      <tr style="font-weight:700;"><td>Total</td><td class="warn">2/7</td><td class="warn">2/7</td><td class="ok">7/7</td><td>~6.8 h &middot; \$106 avg</td></tr>
+      <tr><td>Chapar Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; $148</td></tr>
+      <tr><td>Read-Your-Writes</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>2 h &middot; $52</td></tr>
+      <tr><td>Monotonic Reads</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>7 h &middot; $102</td></tr>
+      <tr><td>Monotonic Writes</td><td>2/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>3 h &middot; $58</td></tr>
+      <tr><td>RYW + MW</td><td class="warn">0/3</td><td class="warn">1/3</td><td class="ok">3/3</td><td>5 h &middot; $93</td></tr>
+      <tr><td>Suite Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td>2/3</td><td>11 h &middot; $155</td></tr>
+      <tr><td>Labeled Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; $136</td></tr>
+      <tr style="font-weight:700;"><td>Total</td><td class="warn">2/7</td><td class="warn">2/7</td><td class="ok">7/7</td><td>~6.8 h &middot; $106 avg</td></tr>
     </table>
     <div class="callout" style="margin-top: 0.9em;">
       IDS runs on the <strong>same model as Codex (GPT-5.4)</strong>, same prompt and budget &mdash; so 2/7&rarr;7/7 is the <span class="highlight">architecture</span>, not the model. Chapar's proof closed in <strong>10 h</strong>, roughly <span class="highlight">200&times; faster</span> than the cited 9&ndash;12 months of expert effort.
@@ -520,7 +495,7 @@
       </div>
       <div class="step info-box" style="padding: 0.6em 0.85em;">
         <div class="label">How much does a run cost / how long?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">On average <strong>~6.8 h and ~\$106</strong> per spec; max 11 h / \$155. Same model and budget as the baselines, so the comparison isolates the <em>architecture</em>.</span>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">On average <strong>~6.8 h and ~$106</strong> per spec; max 11 h / $155. Same model and budget as the baselines, so the comparison isolates the <em>architecture</em>.</span>
       </div>
       <div class="step info-box" style="padding: 0.6em 0.85em;">
         <div class="label">Is the win the model or the method?</div>
@@ -559,6 +534,28 @@
       <div class="author" style="margin-top: 1.2em; font-size: clamp(0.95rem,1.5vw,1.25rem);">
         Thank you &mdash; <strong>Questions?</strong>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== APPENDIX: WHY THE NAME (deductive vs inductive) ==================== -->
+  <div class="slide" id="s4c" data-section="Appendix">
+    <h3>Appendix &mdash; Why &ldquo;Inductive Deductive&rdquo;?</h3>
+    <h2>Two classic synthesis strategies, <span class="highlight">fused</span></h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.2em; align-items: stretch;">
+      <div class="step info-box" style="border-top: 4px solid var(--accent);">
+        <div style="font-weight:900; color: var(--accent); font-size: clamp(1.1rem,1.7vw,1.5rem);">Deductive &mdash; reason <em>down</em> from rules</div>
+        <span style="font-size: clamp(0.95rem,1.4vw,1.2rem);">Start from the <strong>spec</strong> and inference rules; derive an impl + proof that <em>must</em> satisfy it. <span class="ok">Truth-preserving &mdash; guaranteed correct.</span><br>
+        <span class="warn">Weakness:</span> only as good as the strategy &mdash; a bad design just grinds to a halt.</span>
+      </div>
+      <div class="step info-box" style="border-top: 4px solid var(--accent2);">
+        <div style="font-weight:900; color: var(--accent2); font-size: clamp(1.1rem,1.7vw,1.5rem);">Inductive &mdash; generalize <em>up</em> from cases</div>
+        <span style="font-size: clamp(0.95rem,1.4vw,1.2rem);">Learn from <strong>failed attempts</strong> to hypothesize a better strategy. <span class="ok">This is how good designs get discovered.</span><br>
+        <span class="warn">Weakness:</span> generalization guarantees nothing on its own.</span>
+      </div>
+    </div>
+    <div class="step callout" style="margin-top: 1.2em; text-align: center; border-color: var(--green);">
+      <strong>Complementary:</strong> deduction guarantees correctness <em>under</em> a strategy; induction <em>discovers</em> better strategies from what failed.<br><span style="color: var(--accent); font-weight:700;">IDS puts both in one loop.</span>
+      <span style="display:block; color: var(--dim); font-size: 0.85em; margin-top: 0.4em;">(&ldquo;Inductive&rdquo; = generalize-from-failure &mdash; not the mathematical induction the proofs happen to use internally.)</span>
     </div>
   </div>
 

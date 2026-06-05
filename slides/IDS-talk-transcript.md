@@ -1,9 +1,9 @@
 # Speaker Transcript — Inductive Deductive Synthesis (IDS)
 
-**Target:** ~10–12 min talk · 12 slides, ~1 minute each
+**Target:** ~10 min talk · 11 slides + 1 appendix, ~1 minute each
 **How to use:** Each slide has a **~1-min word-for-word script** (≈ 140 wpm) and a **cue** for when to advance. Keep the *nouns* on the slide and the *sentences* in your mouth.
 
-**Live slide order:** 1 Title · 2 Why not just test? · 3 What is formal verification? · 4 Rocq/Coq aside · 5 The oracle · 6 Why "Inductive Deductive"? · 7 The system · 8 Results 7/7 · 9 Related work · 10 Cross-language generality · 11 Anticipated questions · 12 Conclusion.
+**Live slide order:** 1 Title · 2 Why not just test? · 3 What is formal verification? · 4 Rocq/Coq aside · 5 The oracle · 6 The system · 7 Results 7/7 · 8 Cross-language generality · 9 Related work · 10 Anticipated questions · 11 Conclusion. **Appendix (after conclusion):** Why "Inductive Deductive"?
 
 ---
 
@@ -71,21 +71,7 @@
 
 ---
 
-## Slide 6 — Why "Inductive Deductive"?  ·  ~1 min
-
-> "A word on the name, because it tells you how the system works. IDS fuses two classic, *opposite* synthesis strategies.
->
-> **Deductive** = reasoning *downward* from rules you trust: from the spec and inference rules you mechanically derive an implementation and proof that *must* satisfy it. Truth-preserving — guaranteed correct — but only under a good strategy; pick a bad design and deductive steps grind to a halt.
->
-> **Inductive** = reasoning *upward* from examples — here, generalizing from *failed attempts* to a better hypothesis about which strategy will work. It's how you discover good designs, but it guarantees nothing on its own.
->
-> They're complementary: deduction guarantees correctness *under* a strategy; induction *discovers* better strategies from failure. IDS puts both in one loop — and that maps onto two agent types, which is the next slide. One note: 'inductive' here means learn-from-failure, *not* the mathematical induction the proofs happen to use internally."
-
-**Cue:** advance on "the next slide."
-
----
-
-## Slide 7 — The system  ·  ~1 min
+## Slide 6 — The system  ·  ~1 min
 
 > "We realize this as a multi-agent loop. Two roles matter.
 >
@@ -99,7 +85,7 @@
 
 ---
 
-## Slide 8 — Results: 7/7  ·  ~1 min
+## Slide 7 — Results: 7/7  ·  ~1 min
 
 > "Does it work? **Seven out of seven** specs, versus *two out of seven* for both baselines — under the same prompt and the same budget. And note the column headers: Codex runs on GPT-5.4, Claude Code on Opus 4.6 — and **IDS runs on GPT-5.4 too**, the same model as Codex. So the jump from two to seven is the *architecture*, not a better model.
 >
@@ -113,7 +99,7 @@
 
 ---
 
-## Slide 9 — Cross-language generality  ·  ~1 min
+## Slide 8 — Cross-language generality  ·  ~1 min
 
 > "Right after the headline result, let me answer an obvious question: is this just a Rocq trick? No. The DSA is a **language-agnostic agent loop** — they instantiate it per language by editing the agent's brief, a `CLAUDE.md` file, to swap the verifier, the success criterion, and the tool surface, then evaluate each benchmark in its *native* tool: Lean for VERINA and miniCodeProps, Dafny for DafnyBench and CloverBench, Verus for Verus-Bench, Coq for CoqStoq. It was *not* one Rocq run.
 >
@@ -123,7 +109,7 @@
 
 ---
 
-## Slide 10 — Related work  ·  ~1 min
+## Slide 9 — Related work  ·  ~1 min
 
 > "Now where IDS sits in the literature. Verified code generation has three components — spec, implementation, proof — and IDS relates to four threads.
 >
@@ -133,7 +119,7 @@
 
 ---
 
-## Slide 11 — Anticipated questions  ·  reveal on click; use as needed
+## Slide 10 — Anticipated questions  ·  reveal on click; use as needed
 
 *(Tiles animate in one per click. Don't read top-to-bottom — let the audience ask and click to the relevant tile, or volunteer one if the room is quiet.)*
 
@@ -161,7 +147,7 @@
 
 ---
 
-## Slide 12 — Conclusion  ·  ~1 min
+## Slide 11 — Conclusion  ·  ~1 min
 
 > "To wrap up: verified software used to be a *person-year* problem. IDS turns it into a *compute* problem — joint, incremental code-and-proof under a partial-proof oracle, with failure *and* performance feedback in the same loop.
 >
@@ -170,6 +156,22 @@
 > The honest catch — and the paper says it outright — is that the bottleneck has *moved*: writing the **specification** is now the hard part, because a guarantee is only as good as its spec. Thank you — happy to take questions."
 
 **Cue:** stop.
+
+---
+
+# Appendix (after the conclusion — use only if asked)
+
+## Appendix — Why "Inductive Deductive"?  ·  ~1 min
+
+*(Pulled out of the main flow; jump here if someone asks about the name.)*
+
+> "A word on the name, because it tells you how the system works. IDS fuses two classic, *opposite* synthesis strategies.
+>
+> **Deductive** = reasoning *downward* from rules you trust: from the spec and inference rules you mechanically derive an implementation and proof that *must* satisfy it. Truth-preserving — guaranteed correct — but only under a good strategy; pick a bad design and deductive steps grind to a halt.
+>
+> **Inductive** = reasoning *upward* from examples — here, generalizing from *failed attempts* to a better hypothesis about which strategy will work. It's how you discover good designs, but it guarantees nothing on its own.
+>
+> They're complementary: deduction guarantees correctness *under* a strategy; induction *discovers* better strategies from failure. IDS puts both in one loop — and that maps onto the two agent types, DSA and ISA. One note: 'inductive' here means learn-from-failure, *not* the mathematical induction the proofs happen to use internally."
 
 ---
 
@@ -182,12 +184,12 @@
 | 3 | What is formal verification? | 1:00 | 3:00 |
 | 4 | Rocq/Coq aside | 0:20 | 3:20 |
 | 5 | The oracle *(code walkthrough)* | 1:30 | 4:50 |
-| 6 | Why "Inductive Deductive"? | 1:00 | 5:50 |
-| 7 | The system | 1:00 | 6:50 |
-| 8 | Results — 7/7 | 1:00 | 7:50 |
-| 9 | Cross-language generality | 1:00 | 8:50 |
-| 10 | Related work | 1:00 | 9:50 |
-| 11 | Anticipated questions | — | (Q&A) |
-| 12 | Conclusion | 1:00 | ~10:50 |
+| 6 | The system | 1:00 | 5:50 |
+| 7 | Results — 7/7 | 1:00 | 6:50 |
+| 8 | Cross-language generality | 1:00 | 7:50 |
+| 9 | Related work | 1:00 | 8:50 |
+| 10 | Anticipated questions | — | (Q&A) |
+| 11 | Conclusion | 1:00 | ~9:50 |
+| — | *Appendix — Why "Inductive Deductive"?* | reserve | — |
 
-**If running long:** drop the Rocq/Coq aside (4), compress slides 9 and 10. **If short:** expand the Chapar backtracking story on slide 8 — the most memorable concrete result.
+**If running long:** drop the Rocq/Coq aside (4), compress slides 8 and 9. **If short:** expand the Chapar backtracking story on slide 7 — the most memorable concrete result.
