@@ -378,6 +378,28 @@
     </div>
   </div>
 
+  <!-- ==================== SLIDE 5: WHY THE NAME (deductive vs inductive) ==================== -->
+  <div class="slide" id="s4c" data-section="The Name">
+    <h3>Why &ldquo;Inductive Deductive&rdquo;?</h3>
+    <h2>Two classic synthesis strategies, <span class="highlight">fused</span></h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.2em; align-items: stretch;">
+      <div class="step info-box" style="border-top: 4px solid var(--accent);">
+        <div style="font-weight:900; color: var(--accent); font-size: clamp(1.1rem,1.7vw,1.5rem);">Deductive &mdash; reason <em>down</em> from rules</div>
+        <span style="font-size: clamp(0.95rem,1.4vw,1.2rem);">Start from the <strong>spec</strong> and inference rules; derive an impl + proof that <em>must</em> satisfy it. <span class="ok">Truth-preserving &mdash; guaranteed correct.</span><br>
+        <span class="warn">Weakness:</span> only as good as the strategy &mdash; a bad design just grinds to a halt.</span>
+      </div>
+      <div class="step info-box" style="border-top: 4px solid var(--accent2);">
+        <div style="font-weight:900; color: var(--accent2); font-size: clamp(1.1rem,1.7vw,1.5rem);">Inductive &mdash; generalize <em>up</em> from cases</div>
+        <span style="font-size: clamp(0.95rem,1.4vw,1.2rem);">Learn from <strong>failed attempts</strong> to hypothesize a better strategy. <span class="ok">This is how good designs get discovered.</span><br>
+        <span class="warn">Weakness:</span> generalization guarantees nothing on its own.</span>
+      </div>
+    </div>
+    <div class="step callout" style="margin-top: 1.2em; text-align: center; border-color: var(--green);">
+      <strong>Complementary:</strong> deduction guarantees correctness <em>under</em> a strategy; induction <em>discovers</em> better strategies from what failed. IDS puts both in one loop.
+      <span style="display:block; color: var(--dim); font-size: 0.85em; margin-top: 0.4em;">(&ldquo;Inductive&rdquo; = generalize-from-failure &mdash; not the mathematical induction the proofs happen to use internally.)</span>
+    </div>
+  </div>
+
   <!-- ==================== SLIDE 6: ARCHITECTURE ==================== -->
   <div class="slide" id="s5" data-section="System">
     <h3>The System</h3>
