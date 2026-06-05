@@ -1,7 +1,9 @@
 # Speaker Transcript — Inductive Deductive Synthesis (IDS)
 
-**Target:** ~8 min talk · 8 slides, ~1 minute each · + 2 appendix slides (Q&A, Rocq/Coq) held in reserve
-**How to use:** Each slide has a **~1-min word-for-word script** (≈ 140 wpm ≈ 140 words) and a **cue** for when to advance. Keep the *nouns* on the slide and the *sentences* in your mouth.
+**Target:** ~10–12 min talk · 12 slides, ~1 minute each
+**How to use:** Each slide has a **~1-min word-for-word script** (≈ 140 wpm) and a **cue** for when to advance. Keep the *nouns* on the slide and the *sentences* in your mouth.
+
+**Live slide order:** 1 Title · 2 Why not just test? · 3 What is formal verification? · 4 Rocq/Coq aside · 5 The oracle · 6 Why "Inductive Deductive"? · 7 The system · 8 Results 7/7 · 9 Related work · 10 Cross-language generality · 11 Anticipated questions · 12 Conclusion.
 
 ---
 
@@ -15,139 +17,159 @@
 
 ---
 
-## Slide 2 — What is formal verification?  ·  ~1 min
+## Slide 2 — Why not just test?  ·  ~1 min
 
-*(This is the gentle intro for anyone not steeped in formal methods.)*
-
-> "Let me start with what formal verification even is. A formally verified system has **three pieces**. The **specification** is a precise *mathematical* statement of what correct means. The **implementation** is the code that actually runs. And the **proof** is a machine-checkable argument that, on *every* input, the implementation matches the specification.
+> "Let me motivate why we need proof at all. **Testing samples; verification proves.**
 >
-> Historically, **humans wrote all three** — and that's exactly why formal methods barely scaled over the last two decades: verifying a real system takes *months to years* of expert effort. Chapar's key-value-store proof took nine to twelve months.
+> A test suite checks only the inputs you *happen to try* — so a bug in any untried case slips straight through. As Dijkstra put it, testing shows the *presence* of bugs, never their absence. **Verification** is the opposite: one proof covers *every* input at once, and for a concurrent system, *every* interleaving of messages and failures. It's a guarantee of the **absence** of bugs.
+>
+> And that's exactly what distributed systems need. The space of behaviors — every ordering of messages, every failure, every concurrent update — is astronomically large; no test suite can cover it. IDS gives the agent a guarantee that holds on *every possible behavior*: the code **and** a machine-checked proof, together."
+
+**Cue:** advance on "machine-checked proof, together."
+
+---
+
+## Slide 3 — What is formal verification?  ·  ~1 min
+
+*(Gentle intro for anyone not steeped in formal methods.)*
+
+> "So what *is* formal verification? A formally verified system has **three pieces**. The **specification** is a precise *mathematical* statement of what correct means. The **implementation** is the code that actually runs. And the **proof** is a machine-checkable argument that, on *every* input, the implementation matches the specification.
+>
+> Historically, **humans wrote all three** — and that's exactly why formal methods barely scaled over two decades: verifying a real system takes *months to years* of expert effort. Chapar's key-value-store proof took nine to twelve months.
 >
 > So the natural question: can we just hand a coding agent the **spec and the proof tooling** and let it produce a provably-correct system? **IDS** does precisely this — the human writes only the spec, and IDS automatically produces *both* the implementation and the proof, using LLM agents driven by the proof assistant **Rocq**."
 
-**Cue:** advance on "the proof assistant Rocq." *(Gesture across the three pieces, then the then/now boxes.)*
+**Cue:** advance on "the proof assistant Rocq." *(That word sets up the next slide.)*
 
 ---
 
-## Slide 3 — The oracle  ·  ~1 min   *(slide locked — do not edit)*
+## Slide 4 — Aside: Rocq or Coq?  ·  ~15–20 sec (optional)
 
-> "Why does checking *partial* proofs even work? Because the proof assistant — Rocq, formerly Coq — is a **perfect oracle**: it accepts a file *if and only if* it's correct. No false positives, no false negatives. Compare that to tests, which only see inputs you tried.
->
-> The figure is the toy example — a counter. The **spec**, on the left, states two axioms about `init`, `inc`, and `read`: reading the initial state returns zero, and reading after an increment returns one more than before. In the **partial** synthesis, in the center, `inc`'s body and the `read_inc` theorem are deferred with `Admitted` — a placeholder for unfinished work — but Rocq *still accepts the file*, because the chosen representation, a list whose length encodes the count, is consistent with the work so far. The **complete** synthesis on the right fills in those holes. The representation is a free choice — any state satisfying the axioms works, though a plain `nat` would be more efficient.
->
-> Scale this up and the axioms become read-your-writes consistency, that one number becomes a per-client vector clock, and the one-line tactic becomes an inductive simulation with dozens of lemmas."
+> "Quick aside, since I just said *Rocq* — yes, that's the proof assistant you may know as **Coq**. It was officially renamed **Rocq** as of version 9.0: partly to honor *Inria Rocquencourt*, where it started, and partly — per the dev team — to avoid the unfortunate English slang. Same tool, new name. I'll say Rocq from here on."
 
-**Cue:** advance on "dozens of lemmas."
+**Cue:** advance quickly — this is comic relief, don't dwell. *(Skip entirely if running long.)*
 
 ---
 
-## Slide 4 — Why "Inductive Deductive"?  ·  ~1 min
+## Slide 5 — The oracle  ·  ~1.5 min   *(slide locked — do not edit the slide; this is the code walkthrough)*
 
-> "A quick word on the name, because it tells you exactly how the system works. IDS fuses two classic, *opposite* synthesis strategies.
+> "Here's *why* the partial-proof idea works: the proof assistant is a **perfect oracle** — it accepts a file *if and only if* it's correct. No false positives, no false negatives, unlike tests.
 >
-> **Deductive** means reasoning *downward* from rules you already trust: you start from the spec and inference rules and mechanically derive an implementation and proof that *must* satisfy it. It's truth-preserving — guaranteed correct — but only if you're following a good strategy; pick a bad design and deductive steps just grind to a halt with no idea how to recover.
->
-> **Inductive** is the opposite: reasoning *upward* from examples — here, generalizing from *failed attempts* to form a better hypothesis about which strategy will work. It's how you discover good strategies in the first place, but generalization guarantees nothing on its own.
->
-> So they're complementary. Deduction guarantees correctness *under* a strategy; induction *discovers* better strategies from what failed. IDS's contribution is putting both in one feedback loop — and that maps directly onto two agent types, which is the next slide. One note: 'inductive' here means learning-from-failure, *not* the mathematical induction the proofs happen to use internally."
+> The figure is the toy example — a **counter**. Let me actually read it.
 
-**Cue:** advance on "the next slide" (or after the parenthetical if the audience looks technical).
+**The spec (left).** It declares an abstract counter: a state type `t`, an initial state `init`, an `inc` operation that takes a state to a state, and a `read` that turns a state into a natural number. Then two **axioms** — these are the correctness requirements, in math:
+>   - `read_init`: `read init = 0` — *"reading the initial state returns zero."*
+>   - `read_inc`: `forall s, read (inc s) = S (read s)` — *"for every state s, reading after one increment gives the **successor** of reading before."* `S` is Peano successor, so `S n` is just `n + 1`. In English: **incrementing always bumps the count up by exactly one.**
+
+**The partial synthesis (center).** The agent makes a design choice: represent the state as a **list of `unit`** — `unit` is the type with a single value `tt`, so the list carries no data; only its *length* matters. `init` is the empty list `nil`, and `read` is just `length`. It proves `read_init` trivially — `length nil = 0` — but it *defers* `inc`'s body and the `read_inc` theorem with `Admitted`, a placeholder for unfinished work. The key point: **Rocq still accepts this file.** The partial design is internally consistent, so the agent knows it's on track before committing.
+
+**The complete synthesis (right).** It fills the hole: `inc s := tt :: s` — *cons* one `tt` onto the front of the list. Since the list's length *is* the count, prepending one element grows the length by exactly one — which is precisely what `read_inc` demands. The proof closes with a one-line tactic.
+>
+> "And note: the representation was a *free choice*. Any state satisfying those axioms works — a plain `nat` would actually be more efficient. That freedom to pick the representation is exactly the lever IDS exploits later. Now scale this up: the axioms become read-your-writes consistency, the count becomes a per-client vector clock, and the one-line tactic becomes an inductive simulation with dozens of lemmas."
+
+**Cue:** advance on "dozens of lemmas." *(If short on time: read just the two axioms and the `tt::s` line — that's the core.)*
 
 ---
 
-## Slide 5 — The system  ·  ~1 min
+## Slide 6 — Why "Inductive Deductive"?  ·  ~1 min
 
-> "We realize this as a multi-agent system. Two roles matter.
+> "A word on the name, because it tells you how the system works. IDS fuses two classic, *opposite* synthesis strategies.
 >
-> The **Deductive Synthesis Agent**, on the left, recursively breaks a component and its spec into sub-parts using placeholders, and the type-checker grades *every* step — complete or partial.
+> **Deductive** = reasoning *downward* from rules you trust: from the spec and inference rules you mechanically derive an implementation and proof that *must* satisfy it. Truth-preserving — guaranteed correct — but only under a good strategy; pick a bad design and deductive steps grind to a halt.
 >
-> When it gets stuck, the **Inductive Synthesis Agent** steps in with two modes: a **proposer** that suggests helper lemmas for a tactical stall, and a **reloader** that throws out the design and respawns a fresh one when it hits a true dead end.
+> **Inductive** = reasoning *upward* from examples — here, generalizing from *failed attempts* to a better hypothesis about which strategy will work. It's how you discover good designs, but it guarantees nothing on its own.
 >
-> A **coordinator** runs these in parallel, **benchmarks** candidates eagerly — even before the proof closes — and **audits** finished proofs to make sure they're not vacuous. That audit is what stops the agent from cheating its way to a trivial 'proof.'"
+> They're complementary: deduction guarantees correctness *under* a strategy; induction *discovers* better strategies from failure. IDS puts both in one loop — and that maps onto two agent types, which is the next slide. One note: 'inductive' here means learn-from-failure, *not* the mathematical induction the proofs happen to use internally."
+
+**Cue:** advance on "the next slide."
+
+---
+
+## Slide 7 — The system  ·  ~1 min
+
+> "We realize this as a multi-agent loop. Two roles matter.
+>
+> The **Deductive Synthesis Agent** — the DSA — takes a strategy and recursively breaks a component and its spec into sub-parts using placeholders, building implementation and proof step by step. Rocq's type-checker grades *every* step — complete or partial — so a yes means on-track, a no rules the path out.
+>
+> When a DSA stalls, the **Inductive Synthesis Agent** — the ISA — steps in, in two modes: a **proposer** that suggests helper lemmas for a tactical stall, and a **reloader** that throws out the whole design and respawns a DSA with a fresh one on a true dead end. The classic example: the first design stores a replica's state as one big object and the proof gets stuck; the ISA pivots to one small table per key, and the proof splits into easy per-key cases.
+>
+> A **coordinator** runs DSAs in parallel, **benchmarks** candidates eagerly — even before the proof closes — and **audits** finished proofs so they're not vacuous. That audit is what stops the agent cheating its way to a trivial 'proof.'"
 
 **Cue:** advance on "trivial proof."
 
 ---
 
-## Slide 6 — Results: 7/7  ·  ~1 min
+## Slide 8 — Results: 7/7  ·  ~1 min
 
-> "So, does it work? **Seven out of seven** specs, versus *two out of seven* for both baselines — under the same prompt and the same budget.
+> "Does it work? **Seven out of seven** specs, versus *two out of seven* for both baselines — under the same prompt and the same budget. And note the column headers: Codex runs on GPT-5.4, Claude Code on Opus 4.6 — and **IDS runs on GPT-5.4 too**, the same model as Codex. So the jump from two to seven is the *architecture*, not a better model.
 >
-> Look at the top row, Chapar causal consistency: both baselines fail, IDS closes it in ten hours for a hundred and forty-eight dollars. That proof took human experts nine to twelve months — so that's roughly **two hundred times faster**, with no human in the loop and no fine-tuning.
+> Top row, Chapar causal consistency: both baselines fail; IDS closes it in ten hours for a hundred forty-eight dollars. That proof took human experts nine to twelve months — roughly **two hundred times faster**, no human in the loop.
 >
-> The recurring trick is in the *data representation*: IDS **backtracks** and changes the storage layout — say, one entry per key — so the proof splits into small, easy cases. The baselines keep the default layout, never backtrack, and stall on exactly the hard specs."
+> The recurring move is in the *data representation*: IDS **backtracks** and changes the storage layout — one entry per key, say — so the proof splits into small cases. The baselines keep the default layout, never backtrack, and stall on exactly the hard specs."
 
 **Cue:** advance on "stall on exactly the hard specs."
 
+*(If asked about "2/3" or "3/3": it's successful runs out of 3 attempts; a spec counts as solved at ≥2/3. Suite CC at 2/3 is the honest weak point.)*
+
 ---
 
-## Slide 7 — Related work  ·  ~1 min
+## Slide 9 — Related work  ·  ~1 min
 
-> "Quick map of where IDS sits. Verified code generation has three components — spec, implementation, proof — and IDS relates to four threads of prior work.
+> "Where IDS sits. Verified code generation has three components — spec, implementation, proof — and IDS relates to four threads.
 >
-> *Specification generation* — nl2postcond, AutoSpec, Clover — produces specs; IDS instead *consumes* a spec as input. *Evaluator-guided program generation* — SWE-agent, Reflexion, FunSearch, AlphaEvolve — uses the same search-against-an-evaluator scheme, but our evaluator is a *proof assistant*, so we get guarantees on *all* inputs rather than sampled tests. *Automated proof generation* — AutoVerus, LeanDojo, DeepSeek-Prover — fixes the implementation and spec and asks only for the proof; IDS generates implementation and proof *jointly*, and also optimizes performance. And *verified synthesis* — classical methods like Synquid and CEGIS, plus hand-built systems like IronFleet, Verdi, and Chapar — was either confined to small functions or cost months to years by hand. IDS's contribution is verified synthesis at *systems scale, in hours*."
+> *Specification generation* — the task there is intent-to-spec or code-to-spec; IDS instead *consumes* a spec. *Evaluator-guided program generation* — SWE-agent, FunSearch, AlphaEvolve — same search-against-an-evaluator scheme, but our evaluator is a *proof assistant*, so we get guarantees on *all* inputs, not sampled tests. *Automated proof generation* fixes the impl and spec and asks only for the proof; IDS generates impl and proof *jointly* and also optimizes performance. And *verified synthesis* — Synquid, CEGIS, and hand-built systems like IronFleet, Verdi, Chapar — was either confined to small functions or cost months-to-years by hand. IDS's contribution is verified synthesis at *systems scale, in hours*."
 
 **Cue:** advance on "systems scale, in hours."
 
 ---
 
-## Slide 8 — Conclusion  ·  ~1 min
+## Slide 10 — Cross-language generality  ·  ~1 min
 
-> "To wrap up: verified software used to be a *person-year* problem. IDS turns it into a *compute* problem — joint, incremental code-and-proof under a partial-proof oracle, with failure *and* performance feedback in the same loop.
+> "One more result, because it answers an obvious question: is this just a Rocq trick? No. The DSA is a **language-agnostic agent loop** — they instantiate it per language by swapping the verifier, the success criterion, and the tool surface, and evaluate each benchmark in its *native* tool: Lean for VERINA and miniCodeProps, Dafny for DafnyBench and CloverBench, Verus for Verus-Bench, Coq for CoqStoq. It was *not* one Rocq run.
 >
-> The headline numbers: seven out of seven specs, three times faster than expert references, two hundred times faster than human proof effort, and six new Coq specifications released as a benchmark. And it generalizes to any domain with a machine-checkable oracle — kernels, compilers, crypto, hardware.
->
-> The honest catch — and the paper says this outright — is that the bottleneck has *moved*: writing the **specification** is now the hard part, because a guarantee is only as good as its spec. Happy to take questions."
+> On the proof-only benchmarks — where the implementation and spec are already given — the system collapses to just the DSA prover, and it sets a new state of the art on all four. On the harder **code-and-proof** benchmarks, the blue rows, it reaches sixty-two of sixty-two on CloverBench and a hundred seventy-six of one-eighty-nine on VERINA — where the prior best was thirty-eight."
 
-**Cue:** stop. Open for Q&A. *(Jump to the appendix slides if a question lands on one.)*
+**Cue:** advance on "the prior best was thirty-eight." *(Compressible — drop to the headline VERINA number if short.)*
 
 ---
 
-# Appendix slides (held in reserve — not part of the 8-minute flow)
+## Slide 11 — Anticipated questions  ·  reveal on click; use as needed
 
-## Appendix A — Anticipated Questions  *(slide 9)*
-
-*(A backstop grid. Don't read it; let the audience ask, then point to the relevant tile. If no questions come, volunteer: "A question I usually get is whether this just shifts the burden to writing the spec — and the honest answer is yes…")*
+*(Tiles animate in one per click. Don't read top-to-bottom — let the audience ask and click to the relevant tile, or volunteer one if the room is quiet.)*
 
 - **"Doesn't this just shift the burden to writing the spec?"**
-  Yes — and the paper says so explicitly. Writing the formal spec is now the bottleneck. Two future directions: adversarial spec synthesis (an agent interrogating a human in natural language) and spec extraction from existing systems.
-
+  Yes — the paper says so. The spec is now the bottleneck. Future directions: adversarial spec synthesis (an agent interrogating a human in NL) and spec extraction from existing systems.
 - **"Is the proof trusted, or could the agent cheat?"**
-  The audit step rejects vacuous proofs — no remaining `Admitted`/axioms, the real interface must be implemented, the implementation must be non-trivial, and the correct theorem must be stated. They caught an agent shipping a `put-guard` that returned `false` unconditionally.
-
+  The audit step rejects vacuous proofs — no remaining `Admitted`/axioms, the real interface implemented, non-trivial impl, correct theorem stated. They caught an agent shipping a `put-guard` that returned `false` unconditionally.
 - **"Why Coq and not Lean/Verus?"**
-  Maturity of the ecosystem, plus Chapar gave them a complete formal spec to start from. IDS only needs a backend with partial-proof checking, a programmatic interface, and executable extraction — Lean and Verus both qualify.
-
-- **"How much does a run cost / how long?"**
-  ~6.8 hours and ~$106 per spec on average; max 11 hours / $155. Same model and budget as the baselines, so the comparison isolates the architecture.
-
+  Ecosystem maturity, plus Chapar gave a complete formal spec to start from. IDS only needs partial-proof checking, a programmatic interface, and executable extraction — Lean and Verus both qualify (see slide 10).
+- **"Cost / time per spec?"**
+  ~6.8 hours and ~$106 on average; max 11 h / $155. Same model and budget as the baselines — isolates the architecture.
 - **"Is the win the model or the method?"**
-  The method. Swapping the base model (Codex → Claude) under the same prompt gains at most 6%; the IDS architecture adds +10% to +51% on the cross-language benchmarks.
-
+  The method. Swapping the base model (Codex → Claude) under the same prompt gains ≤6%; the IDS architecture adds +10% to +51% on the cross-language benchmarks.
 - **"Does it work beyond key-value stores?"**
-  Empirically evaluated only on distributed KV stores; the DSA-as-general-prover results across four languages suggest the technique transfers, but other domains (OS protocols, crypto) are future work.
+  Evaluated only on distributed KV stores; the DSA-as-general-prover results across four languages suggest it transfers, but other domains (OS protocols, crypto) are future work.
 
-### Tougher / critical questions (be ready, stay calm)
+### Tougher questions (acknowledge the limit, then redirect to what the data supports)
 
-The move on each: **acknowledge the limit honestly, then redirect to what the data does support.**
+- **"N=3 — isn't suite CC at 2/3 one bad run from failure?"** Fair, N=3 is small and suite CC is the honest weak point. But the *gap* is large and consistent: baselines 0/3 on five specs, IDS 3/3 on six — hard to explain by noise.
+- **"Six of seven specs are your own. Grading your own homework?"** Yes — six are co-developed and released as the IDS suite; only Chapar is fully external. But the baselines run on the *same* specs under the *same* budget, so any spec-style bias would help them too.
+- **"200× — but that's the proof, given the spec."** Right framing is "200× on the proof, given the spec." Not end-to-end automation; it's automating the months-to-years proof effort once a spec exists.
+- **"Is the whole win just 'change the representation'?"** That recurring win *is* representation change — but the DSA-as-prover result (SOTA across Dafny, Lean, Verus, Coq, no such trick) shows prover generality; distributed-synthesis generality beyond KV stores is conjectured.
 
-- **"Only 3 runs per spec — isn't suite CC at 2/3 basically one bad run from failure?"**
-  Fair — N=3 is small, and suite CC is the honest weak point. But the *gap* is large and consistent: baselines are 0/3 on five specs, IDS is 3/3 on six. That separation is hard to explain by run-to-run noise.
+**Cue:** advance to the conclusion when discussion winds down.
 
-- **"Six of the seven specs were written by your own team. Aren't you grading your own homework?"**
-  Yes — six are co-developed and released as the IDS suite; only Chapar is fully external. Mitigations: Chapar is the cleanest data point (a 9–12-month proof), and the baselines run on the *same* specs under the *same* budget, so any spec-style bias would help them too.
+---
 
-- **"200× faster than experts — but that's the proof, given the spec. Isn't that misleading?"**
-  The honest framing is "**200× on the proof, given the spec**." The claim isn't end-to-end automation; it's automating the months-to-years *proof* effort once a spec exists.
+## Slide 12 — Conclusion  ·  ~1 min
 
-- **"Is the whole win just 'change the data representation'?"**
-  That recurring win *is* representation change. The counter-evidence for generality is the DSA-as-prover result — SOTA across Dafny, Lean, Verus, and Coq, problems with no such trick. Prover generality is shown; distributed-synthesis generality beyond KV stores is conjectured.
+> "To wrap up: verified software used to be a *person-year* problem. IDS turns it into a *compute* problem — joint, incremental code-and-proof under a partial-proof oracle, with failure *and* performance feedback in the same loop.
+>
+> The headline: seven of seven specs, three times faster than expert references, two hundred times faster than human proof effort, six new Coq specs released. And it generalizes to any domain with a machine-checkable oracle — kernels, compilers, crypto, hardware.
+>
+> The honest catch — and the paper says it outright — is that the bottleneck has *moved*: writing the **specification** is now the hard part, because a guarantee is only as good as its spec. Thank you — happy to take questions."
 
-## Appendix B — Rocq or Coq?  *(slide 10)*
-
-> "Quick aside, since I keep saying *Rocq, formerly Coq* — yes, that's real. The Coq proof assistant was officially renamed **Rocq** as of version 9.0. Part of it honors *Inria Rocquencourt*, where it started — and part of it, per the dev team, is avoiding the unfortunate slang. Same tool, new name."
-
-*(Screenshot-only slide. Pure comic relief; use only if asked.)*
+**Cue:** stop.
 
 ---
 
@@ -156,14 +178,16 @@ The move on each: **acknowledge the limit honestly, then redirect to what the da
 | Slide | Topic | Budget | Running |
 |---|---|---|---|
 | 1 | Title | 1:00 | 1:00 |
-| 2 | What is formal verification (then vs now) | 1:00 | 2:00 |
-| 3 | The oracle *(locked)* | 1:00 | 3:00 |
-| 4 | Why "Inductive Deductive"? | 1:00 | 4:00 |
-| 5 | The system | 1:00 | 5:00 |
-| 6 | Results — 7/7 | 1:00 | 6:00 |
-| 7 | Related work | 1:00 | 7:00 |
-| 8 | Conclusion | 1:00 | 8:00 |
-| — | *Appendix A — Q&A grid* | reserve | — |
-| — | *Appendix B — Rocq/Coq* | reserve | — |
+| 2 | Why not just test? | 1:00 | 2:00 |
+| 3 | What is formal verification? | 1:00 | 3:00 |
+| 4 | Rocq/Coq aside | 0:20 | 3:20 |
+| 5 | The oracle *(code walkthrough)* | 1:30 | 4:50 |
+| 6 | Why "Inductive Deductive"? | 1:00 | 5:50 |
+| 7 | The system | 1:00 | 6:50 |
+| 8 | Results — 7/7 | 1:00 | 7:50 |
+| 9 | Related work | 1:00 | 8:50 |
+| 10 | Cross-language generality | 1:00 | 9:50 |
+| 11 | Anticipated questions | — | (Q&A) |
+| 12 | Conclusion | 1:00 | ~10:50 |
 
-**If running long:** slides 4 and 7 are the most compressible (4 sets up 5; 7 is a map). **If short:** expand the Chapar backtracking story on slide 6 — it's the most memorable concrete result.
+**If running long:** drop the Rocq/Coq aside (4), compress slides 6 and 10. **If short:** expand the Chapar backtracking story on slide 8 — the most memorable concrete result.
