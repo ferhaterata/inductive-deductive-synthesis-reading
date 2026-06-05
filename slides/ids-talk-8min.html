@@ -330,10 +330,34 @@
     </div>
   </div>
 
+  <!-- ==================== SLIDE 3: TESTING vs VERIFICATION ==================== -->
+  <div class="slide" id="s2b" data-section="Motivation">
+    <h3>Why not just test?</h3>
+    <h2>Testing samples; <span class="highlight">verification proves</span></h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.5em; align-items: stretch;">
+      <div class="step info-box" style="border-top: 4px solid var(--accent2);">
+        <div style="font-weight:900; color: var(--accent2); font-size: clamp(1.1rem,1.7vw,1.5rem);">Testing</div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Checks only the inputs you <strong>happen to try</strong></div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>A bug in any <em>untried</em> case slips through</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Shows the <span class="warn">presence</span> of bugs, never their absence</div></div>
+      </div>
+      <div class="step info-box" style="border-top: 4px solid var(--green);">
+        <div style="font-weight:900; color: var(--green); font-size: clamp(1.1rem,1.7vw,1.5rem);">Verification</div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>One proof covers <strong>every</strong> input at once</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Holds under <em>every</em> interleaving of messages &amp; failures</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>A guarantee of the <span class="ok">absence</span> of bugs</div></div>
+      </div>
+    </div>
+    <div class="step callout" style="margin-top: 1.4em; text-align: center;">
+      For a <strong>distributed system</strong>, the behavior space is astronomically large &mdash; no test suite can cover it.
+      IDS gives the agent a guarantee that holds on <span class="highlight">every possible behavior</span>: code <strong>and</strong> a machine-checked proof, together.
+    </div>
+  </div>
+
   <!-- ==================== SLIDE: BACKGROUND / COUNTER + ORACLE ==================== -->
   <div class="slide" id="s4" data-section="Background">
     <h3>Background</h3>
-    <h2>The type-checker is a <span class="highlight">perfect oracle</span> &mdash; even on partial work</h2>
+    <h2>The type-checker is a <span class="highlight">perfect oracle</span> &mdash; even on partial&nbsp;work</h2>
     <img class="fig" src="assets/counter-listing.png" alt="Counter: specification, partial synthesis (yellow = Admitted), complete synthesis (green = filled in). Rocq accepts both files." style="max-height: 42vh; object-fit: contain; align-self: center;">
     <div class="three-col" style="margin-top: 0.9em;">
       <div class="step info-box" style="padding: 0.6em 0.85em;">
@@ -394,6 +418,13 @@
     </div>
   </div>
 
+  <!-- ==================== SLIDE: ROCQ / COQ ==================== -->
+  <div class="slide" id="s8d" data-section="Aside">
+    <h3>Aside &mdash; wait, Rocq or Coq?</h3>
+    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
+         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
+  </div>
+
   <!-- ==================== SLIDE 7: RESULTS Q1 ==================== -->
   <div class="slide" id="s6" data-section="Results">
     <h3>Q1 &mdash; Hard specifications</h3>
@@ -418,12 +449,13 @@
   <div class="slide" id="s8b" data-section="Related Work">
     <h3>Related Work</h3>
     <h2>Verified codegen = <span class="highlight">spec + impl + proof</span> &mdash; where IDS sits</h2>
-    <table style="font-size: clamp(0.78rem, 1.25vw, 1.05rem);">
+    <style>#relwork td, #relwork th { padding-top: 0.85em; padding-bottom: 0.85em; line-height: 1.5; }</style>
+    <table id="relwork" style="font-size: clamp(0.78rem, 1.25vw, 1.05rem);">
       <tr><th>Thread</th><th>Representative work</th><th>How IDS differs</th></tr>
       <tr>
         <td><strong>Specification generation</strong></td>
         <td style="color: var(--dim);">nl2postcond, AutoSpec, Clover</td>
-        <td>IDS <strong>consumes</strong> specs as input &mdash; doesn't produce them</td>
+        <td>The task is <em>intent&rarr;spec</em> or <em>code&rarr;spec</em>. IDS instead <strong>consumes</strong> a spec as input &mdash; it doesn't produce one</td>
       </tr>
       <tr>
         <td><strong>Program gen w/ evaluator</strong></td>
@@ -443,7 +475,39 @@
     </table>
   </div>
 
-  <!-- ==================== SLIDE 10: CONCLUSION ==================== -->
+  <!-- ==================== SLIDE 8: ANTICIPATED Q&A ==================== -->
+  <div class="slide" id="s8c" data-section="Q&amp;A">
+    <h3>Anticipated Questions</h3>
+    <h2>What people usually ask</h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 1.4em 2.2em; margin-top: 0.2em;">
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Doesn't this just shift the burden to writing the spec?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Yes &mdash; the paper says so. The <strong>spec is now the bottleneck</strong>. Two future directions: <em>adversarial spec synthesis</em> (an agent interrogating a human in natural language) and <em>spec extraction</em> from existing systems.</span>
+      </div>
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Is the proof trusted, or could the agent cheat?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">The <strong>audit step</strong> rejects vacuous proofs: no remaining <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">Admitted</code>/axioms, the real interface implemented, non-trivial impl, correct theorem stated. They caught an agent shipping a <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">put-guard = false</code>.</span>
+      </div>
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Why Coq and not Lean / Verus?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Ecosystem maturity, plus Chapar gave a complete formal spec to start from. IDS only needs a backend with <strong>partial-proof checking, a programmatic interface, and executable extraction</strong> &mdash; Lean and Verus both qualify.</span>
+      </div>
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">How much does a run cost / how long?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">On average <strong>~6.8 h and ~\$106</strong> per spec; max 11 h / \$155. Same model and budget as the baselines, so the comparison isolates the <em>architecture</em>.</span>
+      </div>
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Is the win the model or the method?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">The <strong>method</strong>. Swapping the base model (Codex&nbsp;&rarr;&nbsp;Claude) under the same prompt gains <span class="warn">at most 6%</span>; the IDS architecture adds <span class="ok">+10% to +51%</span> on cross-language benchmarks.</span>
+      </div>
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Does it work beyond key-value stores?</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Evaluated only on distributed KV stores. The <strong>DSA-as-general-prover</strong> results across four languages suggest it transfers; other domains (OS protocols, crypto) are future work.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 9: CONCLUSION ==================== -->
   <div class="slide" id="s9" data-section="">
     <div style="text-align: center; margin-top: 1em;">
       <h1 style="margin-bottom: 0.4em;"><span class="highlight">Inductive Deductive Synthesis</span></h1>
@@ -470,45 +534,6 @@
         Thank you &mdash; <strong>Questions?</strong>
       </div>
     </div>
-  </div>
-
-  <!-- ==================== APPENDIX: ANTICIPATED Q&A ==================== -->
-  <div class="slide" id="s10" data-section="Appendix">
-    <h3>Appendix &mdash; Anticipated Questions</h3>
-    <h2>What people usually ask</h2>
-    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 1.4em 2.2em; margin-top: 0.2em;">
-      <div class="info-box" style="padding: 0.6em 0.85em;">
-        <div class="label">Doesn't this just shift the burden to writing the spec?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Yes &mdash; the paper says so. The <strong>spec is now the bottleneck</strong>. Two future directions: <em>adversarial spec synthesis</em> (an agent interrogating a human in natural language) and <em>spec extraction</em> from existing systems.</span>
-      </div>
-      <div class="info-box" style="padding: 0.6em 0.85em;">
-        <div class="label">Is the proof trusted, or could the agent cheat?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">The <strong>audit step</strong> rejects vacuous proofs: no remaining <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">Admitted</code>/axioms, the real interface implemented, non-trivial impl, correct theorem stated. They caught an agent shipping a <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">put-guard = false</code>.</span>
-      </div>
-      <div class="info-box" style="padding: 0.6em 0.85em;">
-        <div class="label">Why Coq and not Lean / Verus?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Ecosystem maturity, plus Chapar gave a complete formal spec to start from. IDS only needs a backend with <strong>partial-proof checking, a programmatic interface, and executable extraction</strong> &mdash; Lean and Verus both qualify.</span>
-      </div>
-      <div class="info-box" style="padding: 0.6em 0.85em;">
-        <div class="label">How much does a run cost / how long?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">On average <strong>~6.8 h and ~\$106</strong> per spec; max 11 h / \$155. Same model and budget as the baselines, so the comparison isolates the <em>architecture</em>.</span>
-      </div>
-      <div class="info-box" style="padding: 0.6em 0.85em;">
-        <div class="label">Is the win the model or the method?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">The <strong>method</strong>. Swapping the base model (Codex&nbsp;&rarr;&nbsp;Claude) under the same prompt gains <span class="warn">at most 6%</span>; the IDS architecture adds <span class="ok">+10% to +51%</span> on cross-language benchmarks.</span>
-      </div>
-      <div class="info-box" style="padding: 0.6em 0.85em;">
-        <div class="label">Does it work beyond key-value stores?</div>
-        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Evaluated only on distributed KV stores. The <strong>DSA-as-general-prover</strong> results across four languages suggest it transfers; other domains (OS protocols, crypto) are future work.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== APPENDIX: ROCQ / COQ ASIDE ==================== -->
-  <div class="slide" id="s11" data-section="Appendix">
-    <h3>Appendix &mdash; wait, Rocq or Coq?</h3>
-    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
-         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
   </div>
 
 </div>
