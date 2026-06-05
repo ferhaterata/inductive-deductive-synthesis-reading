@@ -430,7 +430,13 @@
     <h3>Q1 &mdash; Hard specifications</h3>
     <h2>IDS solves <span class="highlight">7/7</span>; SOTA agents only 2/7</h2>
     <table style="font-size: clamp(0.85rem, 1.4vw, 1.2rem);">
-      <tr><th>Specification</th><th>Codex</th><th>Claude Code</th><th>IDS</th><th>IDS time / cost</th></tr>
+      <tr>
+        <th>Specification</th>
+        <th>Codex<br><span style="font-weight:400; font-size:0.8em; color:var(--dim);">GPT-5.4</span></th>
+        <th>Claude Code<br><span style="font-weight:400; font-size:0.8em; color:var(--dim);">Opus 4.6</span></th>
+        <th>IDS<br><span style="font-weight:400; font-size:0.8em; color:var(--dim);">GPT-5.4</span></th>
+        <th>IDS time / cost</th>
+      </tr>
       <tr><td>Chapar Causal Consistency</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>10 h &middot; \$148</td></tr>
       <tr><td>Read-Your-Writes</td><td class="ok">3/3</td><td class="ok">3/3</td><td class="ok">3/3</td><td>2 h &middot; \$52</td></tr>
       <tr><td>Monotonic Reads</td><td class="warn">0/3</td><td class="warn">0/3</td><td class="ok">3/3</td><td>7 h &middot; \$102</td></tr>
@@ -441,7 +447,7 @@
       <tr style="font-weight:700;"><td>Total</td><td class="warn">2/7</td><td class="warn">2/7</td><td class="ok">7/7</td><td>~6.8 h &middot; \$106 avg</td></tr>
     </table>
     <div class="callout" style="margin-top: 0.9em;">
-      Chapar's causal-consistency proof closed in <strong>10 h</strong> &mdash; roughly <span class="highlight">200&times; faster</span> than the cited 9&ndash;12 months of expert effort. No human intervention, no fine-tuning.
+      IDS runs on the <strong>same model as Codex (GPT-5.4)</strong>, same prompt and budget &mdash; so 2/7&rarr;7/7 is the <span class="highlight">architecture</span>, not the model. Chapar's proof closed in <strong>10 h</strong>, roughly <span class="highlight">200&times; faster</span> than the cited 9&ndash;12 months of expert effort.
     </div>
   </div>
 
