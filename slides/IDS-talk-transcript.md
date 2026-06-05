@@ -113,23 +113,23 @@
 
 ---
 
-## Slide 9 — Related work  ·  ~1 min
+## Slide 9 — Cross-language generality  ·  ~1 min
 
-> "Where IDS sits. Verified code generation has three components — spec, implementation, proof — and IDS relates to four threads.
->
-> *Specification generation* — the task there is intent-to-spec or code-to-spec; IDS instead *consumes* a spec. *Evaluator-guided program generation* — SWE-agent, FunSearch, AlphaEvolve — same search-against-an-evaluator scheme, but our evaluator is a *proof assistant*, so we get guarantees on *all* inputs, not sampled tests. *Automated proof generation* fixes the impl and spec and asks only for the proof; IDS generates impl and proof *jointly* and also optimizes performance. And *verified synthesis* — Synquid, CEGIS, and hand-built systems like IronFleet, Verdi, Chapar — was either confined to small functions or cost months-to-years by hand. IDS's contribution is verified synthesis at *systems scale, in hours*."
-
-**Cue:** advance on "systems scale, in hours."
-
----
-
-## Slide 10 — Cross-language generality  ·  ~1 min
-
-> "One more result, because it answers an obvious question: is this just a Rocq trick? No. The DSA is a **language-agnostic agent loop** — they instantiate it per language by editing the agent's brief, a `CLAUDE.md` file, to swap the verifier, the success criterion, and the tool surface, then evaluate each benchmark in its *native* tool: Lean for VERINA and miniCodeProps, Dafny for DafnyBench and CloverBench, Verus for Verus-Bench, Coq for CoqStoq. It was *not* one Rocq run.
+> "Right after the headline result, let me answer an obvious question: is this just a Rocq trick? No. The DSA is a **language-agnostic agent loop** — they instantiate it per language by editing the agent's brief, a `CLAUDE.md` file, to swap the verifier, the success criterion, and the tool surface, then evaluate each benchmark in its *native* tool: Lean for VERINA and miniCodeProps, Dafny for DafnyBench and CloverBench, Verus for Verus-Bench, Coq for CoqStoq. It was *not* one Rocq run.
 >
 > On the proof-only benchmarks — where the implementation and spec are already given — the system collapses to just the DSA prover, and it beats the prior state of the art on all four: DafnyBench 88 versus 52, miniCodeProps a perfect 100 versus 49, Verus-Bench 149 versus 137, CoqStoq 97 versus 28. On the harder **code-and-proof** benchmarks, the blue rows, it reaches sixty-two of sixty-two on CloverBench and a hundred seventy-six of one-eighty-nine on VERINA — where the prior best was just thirty-eight."
 
 **Cue:** advance on "the prior best was thirty-eight." *(Compressible — drop to the headline VERINA number if short.)*
+
+---
+
+## Slide 10 — Related work  ·  ~1 min
+
+> "Now where IDS sits in the literature. Verified code generation has three components — spec, implementation, proof — and IDS relates to four threads.
+>
+> *Specification generation* — the task there is intent-to-spec or code-to-spec; IDS instead *consumes* a spec. *Evaluator-guided program generation* — SWE-agent, FunSearch, AlphaEvolve — same search-against-an-evaluator scheme, but our evaluator is a *proof assistant*, so we get guarantees on *all* inputs, not sampled tests. *Automated proof generation* fixes the impl and spec and asks only for the proof; IDS generates impl and proof *jointly* and also optimizes performance. And *verified synthesis* — Synquid, CEGIS, and hand-built systems like IronFleet, Verdi, Chapar — was either confined to small functions or cost months-to-years by hand. IDS's contribution is verified synthesis at *systems scale, in hours*."
+
+**Cue:** advance on "systems scale, in hours."
 
 ---
 
@@ -185,9 +185,9 @@
 | 6 | Why "Inductive Deductive"? | 1:00 | 5:50 |
 | 7 | The system | 1:00 | 6:50 |
 | 8 | Results — 7/7 | 1:00 | 7:50 |
-| 9 | Related work | 1:00 | 8:50 |
-| 10 | Cross-language generality | 1:00 | 9:50 |
+| 9 | Cross-language generality | 1:00 | 8:50 |
+| 10 | Related work | 1:00 | 9:50 |
 | 11 | Anticipated questions | — | (Q&A) |
 | 12 | Conclusion | 1:00 | ~10:50 |
 
-**If running long:** drop the Rocq/Coq aside (4), compress slides 6 and 10. **If short:** expand the Chapar backtracking story on slide 8 — the most memorable concrete result.
+**If running long:** drop the Rocq/Coq aside (4), compress slides 9 and 10. **If short:** expand the Chapar backtracking story on slide 8 — the most memorable concrete result.
