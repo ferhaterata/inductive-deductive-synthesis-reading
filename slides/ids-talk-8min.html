@@ -330,34 +330,7 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 4: KEY INSIGHT ==================== -->
-  <div class="slide" id="s3" data-section="Key Idea">
-    <h3>The Key Insight</h3>
-    <h2>Synthesize code <span class="highlight">and</span> proof &mdash; jointly &amp; incrementally</h2>
-    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 2.5vw; align-items: center;">
-      <div>
-        <img class="fig" src="assets/ids-intro.png" alt="Code and proof advance jointly" style="border:none;">
-      </div>
-      <div>
-        <div class="step info-box" style="margin-bottom: 0.7em;">
-          <div class="label">Two benefits</div>
-          <ul style="font-size: clamp(0.95rem,1.4vw,1.2rem); line-height:1.6;">
-            <li>Each joint step is <strong>simpler to prove</strong></li>
-            <li><strong>Partial</strong> proofs are checkable &mdash; a dead-end is ruled out <em>before</em> work is wasted</li>
-          </ul>
-        </div>
-        <div class="step callout">
-          Like <strong>chain-of-thought</strong> &mdash; but every intermediate step is
-          <span class="highlight">formally encoded and verified</span>.
-        </div>
-        <div class="step callout" style="margin-top: 0.6em; border-color: var(--green);">
-          A failed step also becomes a <strong>counterexample</strong> that improves the next design.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== SLIDE 5: BACKGROUND / COUNTER + ORACLE ==================== -->
+  <!-- ==================== SLIDE: BACKGROUND / COUNTER + ORACLE ==================== -->
   <div class="slide" id="s4" data-section="Background">
     <h3>Background</h3>
     <h2>The type-checker is a <span class="highlight">perfect oracle</span> &mdash; even on partial work</h2>
@@ -441,26 +414,36 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 7: RESULTS Q2+Q3 (performance + what drives it) ==================== -->
-  <div class="slide" id="s7" data-section="Results">
-    <h3>Performance &amp; what drives it</h3>
-    <h2>Verified <span class="highlight">and</span> fast &mdash; up to 3&times; throughput</h2>
-    <div style="display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 2.2vw; align-items: center;">
-      <div>
-        <img class="fig" src="assets/eval-perf.png" alt="Throughput, latency, memory vs put rate" style="max-height: 50vh; object-fit: contain;">
-      </div>
-      <div>
-        <div class="step callout">
-          Matches or beats <strong>every</strong> expert reference: <span class="ok">3&times;</span> on Chapar, <span class="ok">1.4&times;</span> on CC &amp; monotonic reads; on MW the reference <em>times out</em>. The proof obligation pushed the agent to <span class="highlight">bounded representations</span>; benchmark feedback picks the fastest <em>verifying</em> one.
-        </div>
-        <div class="step callout" style="margin-top:0.7em; border-color: var(--green);">
-          <strong>What matters?</strong> Remove <strong>joint</strong> discovery &rarr; hard specs collapse to 0/3. Replace rich Rocq diagnostics with accept/reject &rarr; <span class="warn">&minus;35%</span> (the single biggest loss).
-        </div>
-      </div>
-    </div>
+  <!-- ==================== SLIDE 8: RELATED WORK ==================== -->
+  <div class="slide" id="s8b" data-section="Related Work">
+    <h3>Related Work</h3>
+    <h2>Verified codegen = <span class="highlight">spec + impl + proof</span> &mdash; where IDS sits</h2>
+    <table style="font-size: clamp(0.78rem, 1.25vw, 1.05rem);">
+      <tr><th>Thread</th><th>Representative work</th><th>How IDS differs</th></tr>
+      <tr>
+        <td><strong>Specification generation</strong></td>
+        <td style="color: var(--dim);">nl2postcond, AutoSpec, Clover</td>
+        <td>IDS <strong>consumes</strong> specs as input &mdash; doesn't produce them</td>
+      </tr>
+      <tr>
+        <td><strong>Program gen w/ evaluator</strong></td>
+        <td style="color: var(--dim);">SWE-agent, Reflexion, MetaGPT, FunSearch, AlphaEvolve, AlphaDev</td>
+        <td>Same evaluator-guided search &mdash; but the evaluator is a <span class="highlight">proof assistant</span>: guarantees on <em>all</em> inputs, not sampled tests</td>
+      </tr>
+      <tr>
+        <td><strong>Automated proof gen</strong></td>
+        <td style="color: var(--dim);">AutoVerus, Laurel (SMT); CoqGym, DeepSeek-Prover, LeanDojo, COPRA (tactic)</td>
+        <td>Prior work fixes impl + spec, proves only; IDS <strong>jointly</strong> generates impl + proof &amp; <em>optimizes performance</em></td>
+      </tr>
+      <tr>
+        <td><strong>Verified synthesis</strong></td>
+        <td style="color: var(--dim);">Manna&ndash;Waldinger, Synquid, Sketch/CEGIS; VERINA, AlphaVerus; IronFleet, Verdi, FSCQ, Chapar, Iris</td>
+        <td>Classical methods stay small; hand-built systems cost months&ndash;years. IDS: verified synthesis <span class="ok">at systems scale, in hours</span></td>
+      </tr>
+    </table>
   </div>
 
-  <!-- ==================== SLIDE 8: CONCLUSION ==================== -->
+  <!-- ==================== SLIDE 10: CONCLUSION ==================== -->
   <div class="slide" id="s9" data-section="">
     <div style="text-align: center; margin-top: 1em;">
       <h1 style="margin-bottom: 0.4em;"><span class="highlight">Inductive Deductive Synthesis</span></h1>
@@ -532,7 +515,7 @@
 
 <!-- Controls -->
 <div class="progress" id="progress"></div>
-<div class="slide-num" id="slideNum">1 / 10</div><!-- updated by JS; 8 main + 2 appendix -->
+<div class="slide-num" id="slideNum">1 / 10</div><!-- updated by JS -->
 <div class="section-label" id="sectionLabel"></div>
 
 <script>
