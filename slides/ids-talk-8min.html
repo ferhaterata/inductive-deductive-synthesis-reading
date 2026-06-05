@@ -481,6 +481,25 @@
     </table>
   </div>
 
+  <!-- ==================== SLIDE: CROSS-LANGUAGE GENERALITY ==================== -->
+  <div class="slide" id="s8e" data-section="Generality">
+    <h3>Beyond Rocq &mdash; cross-language generality</h3>
+    <h2>One agent loop, <span class="highlight">six benchmarks</span>, four verifiers</h2>
+    <style>#xlang td, #xlang th { padding-top: 0.5em; padding-bottom: 0.5em; line-height: 1.35; }</style>
+    <table id="xlang" style="font-size: clamp(0.78rem, 1.25vw, 1.05rem);">
+      <tr><th>Benchmark</th><th>Language</th><th>Verifier</th><th>Task</th><th>IDS</th></tr>
+      <tr><td><strong>DafnyBench</strong></td><td>Dafny</td><td>Dafny</td><td>annotations <span style="color:var(--dim);font-size:0.9em;">(invariants/asserts stripped, body given)</span></td><td class="ok">88 / 100</td></tr>
+      <tr><td><strong>miniCodeProps</strong></td><td>Lean 4</td><td>Lean</td><td>proof</td><td class="ok">100 / 100</td></tr>
+      <tr><td><strong>Verus-Bench</strong></td><td>Rust</td><td>Verus</td><td>annotations</td><td class="ok">149 / 150</td></tr>
+      <tr><td><strong>CoqStoq</strong></td><td>Coq</td><td>Coq</td><td>proof</td><td class="ok">97 / 100</td></tr>
+      <tr><td><strong>CloverBench</strong></td><td>Dafny</td><td>Dafny</td><td>code + annotations</td><td class="ok">62 / 62</td></tr>
+      <tr><td><strong>VERINA</strong></td><td>Lean 4</td><td>Lean</td><td><strong>code + proof</strong></td><td class="ok">176 / 189</td></tr>
+    </table>
+    <div class="callout" style="margin-top: 0.9em; font-size: clamp(0.88rem,1.35vw,1.15rem);">
+      <strong>Not one Rocq run.</strong> IDS is a <span class="highlight">language-agnostic agent loop</span> &mdash; they instantiate it per language (swap verifier + success criterion + tool surface) and evaluate each benchmark in its native tool. On the <em>proof-only</em> rows (impl &amp; spec given) the system collapses to just the <strong>DSA prover</strong>. Prior SOTA on VERINA was 38; IDS reaches <span class="ok">176</span>.
+    </div>
+  </div>
+
   <!-- ==================== SLIDE 8: ANTICIPATED Q&A ==================== -->
   <div class="slide" id="s8c" data-section="Q&amp;A">
     <h3>Anticipated Questions</h3>
