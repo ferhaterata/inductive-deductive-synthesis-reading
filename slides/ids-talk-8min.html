@@ -392,36 +392,20 @@
   <div class="slide" id="s4" data-section="Background">
     <h3>Background</h3>
     <h2>The type-checker is a <span class="highlight">perfect oracle</span> &mdash; even on partial work</h2>
-    <div style="display: grid; grid-template-columns: 0.62fr 0.38fr; gap: 2vw; align-items: center;">
-      <div class="code" style="font-size: clamp(0.62rem, 0.98vw, 0.86rem); max-height: 62vh;"><span class="cm">(* Specification: a counter *)</span>
-<span class="kw">Axiom</span> read_init : read init = 0.
-<span class="kw">Axiom</span> read_inc : <span class="kw">forall</span> s, read (inc s) = S (read s).
-
-<span class="cm">(* Partial synthesis — still type-checks! *)</span>
-<span class="kw">Definition</span> t := list unit.
-<span class="kw">Definition</span> inc (s:t) : t. <span class="warn">Admitted.</span>   <span class="cm">(* hole *)</span>
-<span class="kw">Theorem</span> read_inc : <span class="kw">forall</span> s, ...
-<span class="warn">Admitted.</span>                            <span class="cm">(* hole *)</span>
-
-<span class="cm">(* Complete synthesis *)</span>
-<span class="kw">Definition</span> inc (s:t) := <span class="str">tt :: s</span>.
-<span class="kw">Proof.</span> intros s. simpl. reflexivity. <span class="ok">Qed.</span></div>
-      <div>
-        <div class="step info-box">
-          <div class="label">Accept iff correct</div>
-          Rocq/Coq accepts a proof <strong>iff</strong> it satisfies its proposition. <span class="ok">No false positives</span>, no false negatives.
-        </div>
-        <div class="step info-box" style="margin-top:0.6em;">
-          <div class="label">vs. weaker signals</div>
-          Tests (only inputs tried), static analysis (over-approximate), LLM-as-judge (guesses).
-        </div>
-        <div class="step callout" style="margin-top:0.6em;">
-          Unproven goals become <strong>deferred holes</strong> (<code style="display:inline;padding:0.1em 0.3em;border:none;background:#fff3cd;">Admitted</code>) &mdash; and the file <em>still checks</em>.
-        </div>
+    <img class="fig" src="assets/counter-listing.png" alt="Counter: specification, partial synthesis (yellow = Admitted), complete synthesis (green = filled in). Rocq accepts both files." style="max-height: 42vh; object-fit: contain; align-self: center;">
+    <div class="three-col" style="margin-top: 0.9em;">
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Accept iff correct</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Rocq/Coq accepts a proof <strong>iff</strong> it satisfies its proposition. <span class="ok">No false positives, no false negatives.</span></span>
       </div>
-    </div>
-    <div class="step" style="text-align:center; margin-top:0.7em; font-size: clamp(0.9rem,1.4vw,1.15rem); color: var(--dim);">
-      Counter <span class="highlight">&rarr;</span> distributed store: axioms become read-your-writes; one <code style="display:inline;padding:0 0.2em;border:none;background:#eee;">nat</code> becomes a per-client vector; tactics become an inductive simulation with dozens of lemmas.
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Partial proofs still check</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Unproven goals become <strong>deferred holes</strong> (<code style="display:inline;padding:0.1em 0.3em;border:none;background:#fff3cd;">Admitted</code>) &mdash; the file <em>still type-checks</em>, so the agent knows on-track from dead-end.</span>
+      </div>
+      <div class="step info-box" style="padding: 0.6em 0.85em;">
+        <div class="label">Counter &rarr; distributed store</div>
+        <span style="font-size: clamp(0.9rem,1.3vw,1.1rem);">Axioms become read-your-writes; one <code style="display:inline;padding:0 0.2em;border:none;background:#eee;">nat</code> becomes a per-client vector; tactics become an inductive simulation.</span>
+      </div>
     </div>
   </div>
 
