@@ -300,7 +300,31 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 2: WHAT IS FORMAL VERIFICATION ==================== -->
+  <!-- ==================== SLIDE 2: TESTING vs VERIFICATION ==================== -->
+  <div class="slide" id="s2b" data-section="Motivation">
+    <h3>Why not just test?</h3>
+    <h2>Testing samples; <span class="highlight">verification proves</span></h2>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.5em; align-items: stretch;">
+      <div class="step info-box" style="border-top: 4px solid var(--accent2);">
+        <div style="font-weight:900; color: var(--accent2); font-size: clamp(1.1rem,1.7vw,1.5rem);">Testing</div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Checks only the inputs you <strong>happen to try</strong></div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>A bug in any <em>untried</em> case slips through</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Shows the <span class="warn">presence</span> of bugs, never their absence</div></div>
+      </div>
+      <div class="step info-box" style="border-top: 4px solid var(--green);">
+        <div style="font-weight:900; color: var(--green); font-size: clamp(1.1rem,1.7vw,1.5rem);">Verification</div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>One proof covers <strong>every</strong> input at once</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Holds under <em>every</em> interleaving of messages &amp; failures</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>A guarantee of the <span class="ok">absence</span> of bugs</div></div>
+      </div>
+    </div>
+    <div class="step callout" style="margin-top: 1.4em; text-align: center;">
+      For a <strong>distributed system</strong>, the behavior space is astronomically large &mdash; no test suite can cover it.
+      IDS gives the agent a guarantee that holds on <span class="highlight">every possible behavior</span>: code <strong>and</strong> a machine-checked proof, together.
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 3: WHAT IS FORMAL VERIFICATION ==================== -->
   <div class="slide" id="s1" data-section="Background">
     <h3>What is formal verification?</h3>
     <h2>An <span class="highlight">exhaustive</span> correctness guarantee &mdash; on <em>every</em> input</h2>
@@ -330,28 +354,11 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 3: TESTING vs VERIFICATION ==================== -->
-  <div class="slide" id="s2b" data-section="Motivation">
-    <h3>Why not just test?</h3>
-    <h2>Testing samples; <span class="highlight">verification proves</span></h2>
-    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.5em; align-items: stretch;">
-      <div class="step info-box" style="border-top: 4px solid var(--accent2);">
-        <div style="font-weight:900; color: var(--accent2); font-size: clamp(1.1rem,1.7vw,1.5rem);">Testing</div>
-        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Checks only the inputs you <strong>happen to try</strong></div></div>
-        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>A bug in any <em>untried</em> case slips through</div></div>
-        <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Shows the <span class="warn">presence</span> of bugs, never their absence</div></div>
-      </div>
-      <div class="step info-box" style="border-top: 4px solid var(--green);">
-        <div style="font-weight:900; color: var(--green); font-size: clamp(1.1rem,1.7vw,1.5rem);">Verification</div>
-        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>One proof covers <strong>every</strong> input at once</div></div>
-        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Holds under <em>every</em> interleaving of messages &amp; failures</div></div>
-        <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>A guarantee of the <span class="ok">absence</span> of bugs</div></div>
-      </div>
-    </div>
-    <div class="step callout" style="margin-top: 1.4em; text-align: center;">
-      For a <strong>distributed system</strong>, the behavior space is astronomically large &mdash; no test suite can cover it.
-      IDS gives the agent a guarantee that holds on <span class="highlight">every possible behavior</span>: code <strong>and</strong> a machine-checked proof, together.
-    </div>
+  <!-- ==================== SLIDE 4: ROCQ / COQ ==================== -->
+  <div class="slide" id="s8d" data-section="Aside">
+    <h3>Aside &mdash; wait, Rocq or Coq?</h3>
+    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
+         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
   </div>
 
   <!-- ==================== SLIDE: BACKGROUND / COUNTER + ORACLE ==================== -->
@@ -418,13 +425,6 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE: ROCQ / COQ ==================== -->
-  <div class="slide" id="s8d" data-section="Aside">
-    <h3>Aside &mdash; wait, Rocq or Coq?</h3>
-    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
-         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
-  </div>
-
   <!-- ==================== SLIDE 7: RESULTS Q1 ==================== -->
   <div class="slide" id="s6" data-section="Results">
     <h3>Q1 &mdash; Hard specifications</h3>
@@ -455,22 +455,22 @@
       <tr>
         <td><strong>Specification generation</strong></td>
         <td style="color: var(--dim);">nl2postcond, AutoSpec, Clover</td>
-        <td>The task is <em>intent&rarr;spec</em> or <em>code&rarr;spec</em>. IDS instead <strong>consumes</strong> a spec as input &mdash; it doesn't produce one</td>
+        <td>The task is <em>intent&rarr;spec</em> or <em>code&rarr;spec</em>.<br><span style="color: var(--accent); font-weight:600;">IDS</span> instead <strong>consumes</strong> a spec as input &mdash; it doesn't produce one</td>
       </tr>
       <tr>
         <td><strong>Program gen w/ evaluator</strong></td>
         <td style="color: var(--dim);">SWE-agent, Reflexion, MetaGPT, FunSearch, AlphaEvolve, AlphaDev</td>
-        <td>Same evaluator-guided search &mdash; but the evaluator is a <span class="highlight">proof assistant</span>: guarantees on <em>all</em> inputs, not sampled tests</td>
+        <td>Same evaluator-guided search.<br><span style="color: var(--accent); font-weight:600;">IDS</span>'s evaluator is a <span class="highlight">proof assistant</span>: guarantees on <em>all</em> inputs, not sampled tests</td>
       </tr>
       <tr>
         <td><strong>Automated proof gen</strong></td>
         <td style="color: var(--dim);">AutoVerus, Laurel (SMT); CoqGym, DeepSeek-Prover, LeanDojo, COPRA (tactic)</td>
-        <td>Prior work fixes impl + spec, proves only; IDS <strong>jointly</strong> generates impl + proof &amp; <em>optimizes performance</em></td>
+        <td>Prior work fixes impl + spec, proves only.<br><span style="color: var(--accent); font-weight:600;">IDS</span> <strong>jointly</strong> generates impl + proof &amp; <em>optimizes performance</em></td>
       </tr>
       <tr>
         <td><strong>Verified synthesis</strong></td>
         <td style="color: var(--dim);">Manna&ndash;Waldinger, Synquid, Sketch/CEGIS; VERINA, AlphaVerus; IronFleet, Verdi, FSCQ, Chapar, Iris</td>
-        <td>Classical methods stay small; hand-built systems cost months&ndash;years. IDS: verified synthesis <span class="ok">at systems scale, in hours</span></td>
+        <td>Classical methods stay small; hand-built systems cost months&ndash;years.<br><span style="color: var(--accent); font-weight:600;">IDS</span>: verified synthesis <span class="ok">at systems scale, in hours</span></td>
       </tr>
     </table>
   </div>
