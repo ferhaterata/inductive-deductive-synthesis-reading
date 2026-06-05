@@ -492,8 +492,8 @@
       <tr><td><strong>miniCodeProps</strong></td><td>Lean 4</td><td>Lean</td><td>proof</td><td class="ok">100 / 100</td></tr>
       <tr><td><strong>Verus-Bench</strong></td><td>Rust</td><td>Verus</td><td>annotations</td><td class="ok">149 / 150</td></tr>
       <tr><td><strong>CoqStoq</strong></td><td>Coq</td><td>Coq</td><td>proof</td><td class="ok">97 / 100</td></tr>
-      <tr><td><strong>CloverBench</strong></td><td>Dafny</td><td>Dafny</td><td>code + annotations</td><td class="ok">62 / 62</td></tr>
-      <tr><td><strong>VERINA</strong></td><td>Lean 4</td><td>Lean</td><td><strong>code + proof</strong></td><td class="ok">176 / 189</td></tr>
+      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>CloverBench</strong></td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">Dafny</td><td style="color: var(--accent);">code + annotations</td><td style="color: var(--accent); font-weight:700;">62 / 62</td></tr>
+      <tr style="color: var(--accent);"><td style="color: var(--accent);"><strong>VERINA</strong></td><td style="color: var(--accent);">Lean 4</td><td style="color: var(--accent);">Lean</td><td style="color: var(--accent);"><strong>code + proof</strong></td><td style="color: var(--accent); font-weight:700;">176 / 189</td></tr>
     </table>
     <div class="callout" style="margin-top: 0.9em; font-size: clamp(0.88rem,1.35vw,1.15rem);">
       <strong>Not one Rocq run.</strong> IDS is a <span class="highlight">language-agnostic agent loop</span> &mdash; they instantiate it per language (swap verifier + success criterion + tool surface) and evaluate each benchmark in its native tool. On the <em>proof-only</em> rows (impl &amp; spec given) the system collapses to just the <strong>DSA prover</strong>. Prior SOTA on VERINA was 38; IDS reaches <span class="ok">176</span>.
