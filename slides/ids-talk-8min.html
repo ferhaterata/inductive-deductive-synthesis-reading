@@ -300,64 +300,33 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 2: THE PROBLEM ==================== -->
-  <div class="slide" id="s1" data-section="Motivation">
-    <h3>The Problem</h3>
-    <h2>AI writes code well &mdash; but can't <span class="warn">guarantee</span> it</h2>
-    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.5em;">
-      <div class="step">
-        <div class="info-box" style="border-left: 4px solid var(--green);">
-          <div class="label">What agents do well</div>
-          <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Generate code for most tasks</div></div>
-          <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Run tests &amp; auto-refine output</div></div>
-          <div class="timeline-item"><div class="timeline-dot" style="background: var(--green);"></div><div>Cover the cases they happen to try</div></div>
-        </div>
+  <!-- ==================== SLIDE 2: WHAT IS FORMAL VERIFICATION ==================== -->
+  <div class="slide" id="s1" data-section="Background">
+    <h3>What is formal verification?</h3>
+    <h2>An <span class="highlight">exhaustive</span> correctness guarantee &mdash; on <em>every</em> input</h2>
+    <div class="three-col" style="gap: 1.6vw;">
+      <div class="info-box" style="border-top: 4px solid var(--accent);">
+        <div style="font-weight:900; color: var(--accent); font-size: clamp(1.05rem,1.6vw,1.4rem);">&#9312; Specification</div>
+        <div style="font-size: clamp(0.92rem,1.35vw,1.15rem); color: var(--dim);">A precise <em>mathematical</em> statement of what correct means.</div>
       </div>
-      <div class="step">
-        <div class="info-box" style="border-left: 4px solid var(--accent2);">
-          <div class="label">Where they fall short</div>
-          <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Correctness <strong>guarantees</strong> over <em>every</em> behavior</div></div>
-          <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Rare bugs testing can't reach</div></div>
-          <div class="timeline-item"><div class="timeline-dot" style="background: var(--accent2);"></div><div>Surface catastrophically at scale</div></div>
-        </div>
+      <div class="info-box" style="border-top: 4px solid var(--accent);">
+        <div style="font-weight:900; color: var(--accent); font-size: clamp(1.05rem,1.6vw,1.4rem);">&#9313; Implementation</div>
+        <div style="font-size: clamp(0.92rem,1.35vw,1.15rem); color: var(--dim);">The code that actually runs.</div>
+      </div>
+      <div class="info-box" style="border-top: 4px solid var(--green);">
+        <div style="font-weight:900; color: var(--green); font-size: clamp(1.05rem,1.6vw,1.4rem);">&#9314; Proof</div>
+        <div style="font-size: clamp(0.92rem,1.35vw,1.15rem); color: var(--dim);">A machine-checkable argument that, on <strong>every input</strong>, the impl matches the spec.</div>
       </div>
     </div>
-    <div class="step callout" style="margin-top: 1.4em; text-align: center;">
-      <strong>Distributed systems</strong> are the prime example: consistency between reads &amp; writes
-      must hold under <span class="warn">every interleaving</span> of messages, failures, and concurrent updates &mdash;
-      a space no test suite can cover.
-    </div>
-  </div>
-
-  <!-- ==================== SLIDE 3: EVIDENCE / THE GAP ==================== -->
-  <div class="slide" id="s2" data-section="Motivation">
-    <h3>The Evidence</h3>
-    <h2>Just hand an agent a proof tool? <span class="warn">No.</span></h2>
-    <div class="two-col" style="grid-template-columns: 1.05fr 1fr; gap: 2.2em;">
-      <div class="step">
-        <div class="info-box">
-          <div class="label">Formal verification works &mdash; but slowly</div>
-          A verified system has three pieces: a <span class="highlight">specification</span>, an <span class="highlight">implementation</span>, and a machine-checked <span class="highlight">proof</span> it matches the spec on every input.
-          <div style="margin-top: 0.6em;">
-            But adoption stalled for 20 years: real systems take
-            <span class="warn">months to years</span> of expert effort.
-            <span style="color: var(--dim); font-size: 0.9em;">(Chapar's KV-store proof: 9&ndash;12 months.)</span>
-          </div>
-        </div>
+    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2.2em; margin-top: 1.4em; align-items: stretch;">
+      <div class="step info-box" style="border-left: 4px solid var(--accent2);">
+        <div class="label" style="color: var(--accent2);">Historically &mdash; humans wrote all three</div>
+        <span style="font-size: clamp(0.95rem,1.45vw,1.25rem);">And it barely scaled: verifying a real system takes <span class="warn">months to years</span> of expert effort. <span style="color: var(--dim); font-size:0.9em;">(Chapar's KV-store proof: 9&ndash;12 months.)</span></span>
       </div>
-      <div class="step">
-        <div class="info-box" style="border-left: 4px solid var(--accent2);">
-          <div class="label">SOTA coding agents, given a proof assistant</div>
-          <div style="font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; color: var(--accent2); text-align:center; line-height:1.1;">2&nbsp;/&nbsp;7</div>
-          <div style="text-align:center; color: var(--dim); margin-bottom:0.5em;">specs solved by Codex (GPT-5.4) <em>and</em> Claude Code (Opus 4.6)</div>
-          <div style="font-size: 0.92em;">The failure is <strong>structural</strong>: agents treat verification as a <em>downstream check</em> &mdash; write all the code, then try to prove it all at once.</div>
-        </div>
+      <div class="step info-box" style="border-left: 4px solid var(--green);">
+        <div class="label" style="color: var(--green);">IDS &mdash; human writes only the spec</div>
+        <span style="font-size: clamp(0.95rem,1.45vw,1.25rem);">From a human-written spec, IDS <strong>automatically produces both the implementation and the proof</strong> &mdash; LLM agents driven by the proof assistant <strong>Rocq</strong>.</span>
       </div>
-    </div>
-    <div class="step" style="text-align: center; margin-top: 1.3em;">
-      <span style="font-size: clamp(1.2rem, 2.2vw, 1.8rem); font-weight: 900; color: var(--accent);">
-        Defer all correctness feedback to the end &rarr; the agent stalls.
-      </span>
     </div>
   </div>
 
@@ -409,13 +378,6 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 5b: ROCQ / COQ ASIDE ==================== -->
-  <div class="slide" id="s4b" data-section="Aside">
-    <h3>Aside &mdash; wait, Rocq or Coq?</h3>
-    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
-         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
-  </div>
-
   <!-- ==================== SLIDE 6: ARCHITECTURE ==================== -->
   <div class="slide" id="s5" data-section="System">
     <h3>The System</h3>
@@ -457,50 +419,57 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 8: RESULTS Q2 PERFORMANCE ==================== -->
+  <!-- ==================== SLIDE 7: RESULTS Q2+Q3 (performance + what drives it) ==================== -->
   <div class="slide" id="s7" data-section="Results">
-    <h3>Q2 &mdash; Performance in the loop</h3>
-    <h2>Verified <span class="highlight">and</span> fast: up to 3&times; throughput</h2>
-    <img class="fig" src="assets/eval-perf.png" alt="Throughput, latency, memory vs put rate" style="max-height: 40vh; object-fit: contain;">
-    <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 2em; margin-top: 0.9em;">
-      <div class="step callout">
-        IDS matches or beats <strong>every</strong> hand-written expert reference: <span class="ok">3&times;</span> on Chapar's vector-clock store, <span class="ok">1.4&times;</span> on CC &amp; monotonic reads; on MW/RYW+MW the reference <em>times out</em>.
-      </div>
-      <div class="step callout" style="border-color: var(--green);">
-        <strong>Why?</strong> The proof obligation drove the agent to <span class="highlight">bounded data representations</span>; benchmark feedback then steers it to the fastest <em>verifying</em> candidate.
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== SLIDE 9: RESULTS Q3 ABLATIONS + GENERAL PROVER ==================== -->
-  <div class="slide" id="s8" data-section="Results">
-    <h3>Q3 &mdash; What drives it + generality</h3>
-    <h2>Joint design &amp; rich feedback <span class="highlight">matter</span></h2>
-    <div style="display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 2.2vw; align-items: center;">
+    <h3>Performance &amp; what drives it</h3>
+    <h2>Verified <span class="highlight">and</span> fast &mdash; up to 3&times; throughput</h2>
+    <div style="display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 2.2vw; align-items: center;">
       <div>
-        <img class="fig" src="assets/eval-crosslang.png" alt="Cross-language success rates" style="max-height: 44vh; object-fit: contain;">
-        <div style="text-align:center; font-size:0.85em; color:var(--dim); margin-top:0.3em;">DSA alone sets new SOTA across 4 languages</div>
+        <img class="fig" src="assets/eval-perf.png" alt="Throughput, latency, memory vs put rate" style="max-height: 50vh; object-fit: contain;">
       </div>
       <div>
-        <div class="step info-box">
-          <div class="label">Ablations (on VERINA, 189 tasks)</div>
-          <ul style="font-size: clamp(0.92rem,1.35vw,1.15rem); line-height:1.55;">
-            <li>Remove <strong>joint</strong> discovery: hard specs &rarr; 0/3</li>
-            <li>Replace structured Coq diagnostic with accept/reject: <span class="warn">&minus;35%</span> (most consequential)</li>
-            <li>Drop perf feedback: <span class="warn">1.42&times; slower</span> on average</li>
-            <li>Drop audit: ships vacuous proofs (e.g. <code style="display:inline;padding:0 0.2em;border:none;background:#fff3cd;">put-guard = false</code>)</li>
-          </ul>
+        <div class="step callout">
+          Matches or beats <strong>every</strong> expert reference: <span class="ok">3&times;</span> on Chapar, <span class="ok">1.4&times;</span> on CC &amp; monotonic reads; on MW the reference <em>times out</em>. The proof obligation pushed the agent to <span class="highlight">bounded representations</span>; benchmark feedback picks the fastest <em>verifying</em> one.
         </div>
         <div class="step callout" style="margin-top:0.7em; border-color: var(--green);">
-          As a <strong>general prover</strong>: 176/189 VERINA (prior 38), 65/77 AlgoVeri (prior 31), <span class="ok">62/62</span> CloverBench. +10% to +51% over the same model without the IDS architecture.
+          <strong>What matters?</strong> Remove <strong>joint</strong> discovery &rarr; hard specs collapse to 0/3. Replace rich Rocq diagnostics with accept/reject &rarr; <span class="warn">&minus;35%</span> (the single biggest loss).
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== SLIDE: ANTICIPATED Q&A ==================== -->
-  <div class="slide" id="s8b" data-section="Q&amp;A">
-    <h3>Anticipated Questions</h3>
+  <!-- ==================== SLIDE 8: CONCLUSION ==================== -->
+  <div class="slide" id="s9" data-section="">
+    <div style="text-align: center; margin-top: 1em;">
+      <h1 style="margin-bottom: 0.4em;"><span class="highlight">Inductive Deductive Synthesis</span></h1>
+      <div style="font-size: clamp(1.1rem, 2vw, 1.6rem); color: var(--dim); margin-bottom: 1.2em;">
+        Verified systems: from a <strong>person-year</strong> bottleneck to a <strong>compute</strong> problem
+      </div>
+      <div style="display: flex; gap: 2.5em; justify-content: center; margin: 1.4em 0; flex-wrap: wrap;">
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--accent);">7/7</div><div style="font-size: 0.9em; color: var(--dim);">specs solved (SOTA: 2/7)</div></div>
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--green);">3&times;</div><div style="font-size: 0.9em; color: var(--dim);">throughput vs. references</div></div>
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--orange);">200&times;</div><div style="font-size: 0.9em; color: var(--dim);">faster than expert effort</div></div>
+        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--accent2);">6</div><div style="font-size: 0.9em; color: var(--dim);">new Coq specs released</div></div>
+      </div>
+      <div class="callout" style="max-width: 900px; margin: 0.5em auto;">
+        Joint, incremental code+proof under a <strong>partial-proof oracle</strong>, with failure &amp; performance feedback in the same loop. Generalizes to any domain with a machine-checkable correctness oracle &mdash; kernels, compilers, crypto, hardware.
+      </div>
+      <div style="margin-top: 1.4em; font-size: clamp(0.9rem, 1.4vw, 1.15rem); color: var(--dim);">
+        Open problem ahead: <span class="highlight">writing the specification</span> is now the bottleneck.
+      </div>
+      <div style="margin-top: 1.0em; display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center;">
+        <span class="tag">github.com/skydiscover-ai/skydiscover</span>
+        <span class="tag">NeurIPS 2026</span>
+      </div>
+      <div class="author" style="margin-top: 1.2em; font-size: clamp(0.95rem,1.5vw,1.25rem);">
+        Thank you &mdash; <strong>Questions?</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APPENDIX: ANTICIPATED Q&A ==================== -->
+  <div class="slide" id="s10" data-section="Appendix">
+    <h3>Appendix &mdash; Anticipated Questions</h3>
     <h2>What people usually ask</h2>
     <div class="two-col" style="grid-template-columns: 1fr 1fr; gap: 1.4em 2.2em; margin-top: 0.2em;">
       <div class="info-box" style="padding: 0.6em 0.85em;">
@@ -530,40 +499,18 @@
     </div>
   </div>
 
-  <!-- ==================== SLIDE 10: CONCLUSION ==================== -->
-  <div class="slide" id="s9" data-section="">
-    <div style="text-align: center; margin-top: 1em;">
-      <h1 style="margin-bottom: 0.4em;"><span class="highlight">Inductive Deductive Synthesis</span></h1>
-      <div style="font-size: clamp(1.1rem, 2vw, 1.6rem); color: var(--dim); margin-bottom: 1.2em;">
-        Verified systems: from a <strong>person-year</strong> bottleneck to a <strong>compute</strong> problem
-      </div>
-      <div style="display: flex; gap: 2.5em; justify-content: center; margin: 1.4em 0; flex-wrap: wrap;">
-        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--accent);">7/7</div><div style="font-size: 0.9em; color: var(--dim);">specs solved (SOTA: 2/7)</div></div>
-        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--green);">3&times;</div><div style="font-size: 0.9em; color: var(--dim);">throughput vs. references</div></div>
-        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--orange);">200&times;</div><div style="font-size: 0.9em; color: var(--dim);">faster than expert effort</div></div>
-        <div><div style="font-size: 2.5em; font-weight: 900; color: var(--accent2);">6</div><div style="font-size: 0.9em; color: var(--dim);">new Coq specs released</div></div>
-      </div>
-      <div class="callout" style="max-width: 900px; margin: 0.5em auto;">
-        Joint, incremental code+proof under a <strong>partial-proof oracle</strong>, with failure &amp; performance feedback in the same loop. Generalizes to any domain with a machine-checkable correctness oracle &mdash; kernels, compilers, crypto, hardware.
-      </div>
-      <div style="margin-top: 1.4em; font-size: clamp(0.9rem, 1.4vw, 1.15rem); color: var(--dim);">
-        Open problem ahead: <span class="highlight">writing the specification</span> is now the bottleneck.
-      </div>
-      <div style="margin-top: 1.0em; display: flex; gap: 0.5em; flex-wrap: wrap; justify-content: center;">
-        <span class="tag">github.com/skydiscover-ai/skydiscover</span>
-        <span class="tag">NeurIPS 2026</span>
-      </div>
-      <div class="author" style="margin-top: 1.2em; font-size: clamp(0.95rem,1.5vw,1.25rem);">
-        Thank you &mdash; <strong>Questions?</strong>
-      </div>
-    </div>
+  <!-- ==================== APPENDIX: ROCQ / COQ ASIDE ==================== -->
+  <div class="slide" id="s11" data-section="Appendix">
+    <h3>Appendix &mdash; wait, Rocq or Coq?</h3>
+    <img src="assets/rocq-coq.png" alt="Rocq is the new name for the Coq proof assistant"
+         style="max-width: 100%; max-height: 78vh; object-fit: contain; align-self: center; border: 1px solid var(--border); border-radius: 8px;">
   </div>
 
 </div>
 
 <!-- Controls -->
 <div class="progress" id="progress"></div>
-<div class="slide-num" id="slideNum">1 / 10</div>
+<div class="slide-num" id="slideNum">1 / 10</div><!-- updated by JS; 8 main + 2 appendix -->
 <div class="section-label" id="sectionLabel"></div>
 
 <script>
